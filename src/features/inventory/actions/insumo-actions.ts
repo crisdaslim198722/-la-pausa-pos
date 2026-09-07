@@ -53,18 +53,53 @@ export async function updateInsumo(id: string, data: UpdateInsumoInput) {
 
     const costoUnitario = Number((validatedData.precioCompra / validatedData.rendimientoUnidad).toFixed(2));
 
-    const updatedInsumo = await prisma.insumo.update({
-      where: { id },
-      data: {
-        unidadCompra: validatedData.unidadCompra,
-        precioCompra: validatedData.precioCompra,
-        rendimientoUnidad: validatedData.rendimientoUnidad,
-        unidadMedida: validatedData.unidadMedida,
-        costoUnitario,
-      },
+    const updatedInsumo = await prisma.$transaction(async (tx) => {
+      // 1. Actualizar el Insumo
+      const insumo = await tx.insumo.update({
+        where: { id },
+        data: {
+          unidadCompra: validatedData.unidadCompra,
+          precioCompra: validatedData.precioCompra,
+          rendimientoUnidad: validatedData.rendimientoUnidad,
+          unidadMedida: validatedData.unidadMedida,
+          costoUnitario,
+        },
+      });
+
+      // 2. Propagar el costo a las Recetas que lo usan
+      const affectedItems = await tx.recetaItem.findMany({
+        where: { insumoId: id }
+      });
+
+      if (affectedItems.length > 0) {
+        // 3. Actualizar subtotales
+        for (const item of affectedItems) {
+          const newSubtotal = Number((Number(item.cantidad) * costoUnitario).toFixed(2));
+          await tx.recetaItem.update({
+            where: { id: item.id },
+            data: { costoSubtotal: newSubtotal }
+          });
+        }
+
+        // 4. Recalcular el total de los productos afectados
+        const productIds = [...new Set(affectedItems.map(i => i.productoId))];
+        for (const pid of productIds) {
+          const allItems = await tx.recetaItem.findMany({
+            where: { productoId: pid }
+          });
+          const newTotal = allItems.reduce((acc, curr) => acc + Number(curr.costoSubtotal), 0);
+          await tx.producto.update({
+            where: { id: pid },
+            data: { costoTotal: Number(newTotal.toFixed(2)) }
+          });
+        }
+      }
+
+      return insumo;
     });
 
     revalidatePath("/inventario/insumos");
+    revalidatePath("/productos"); // Refrescar vista de productos también
     return { success: true, data: serializeInsumo(updatedInsumo) };
   } catch (error: any) {
     return { success: false, error: error.message || "Error al actualizar el insumo" };
