@@ -31,10 +31,37 @@ model Insumo {
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
 
   // relaciones para luego
-  // recetas            RecetaItem[]
+  recetas            RecetaItem[]
   // gastos             Gasto[]
 
   @@index([nombre])
   @@index([costoUnitario])
   @@map("insumos")
+}
+model Producto {
+  id         String       @id @default(uuid())
+  nombre     String       @unique @db.VarChar(150)
+  costoTotal Decimal      @map("costo_total") @db.Decimal(12, 2)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  receta     RecetaItem[]
+  // ordenes    DetallePedido[]
+
+  @@index([nombre])
+  @@index([costoTotal])
+  @@map("productos")
+}
+
+model RecetaItem {
+  id            String   @id @default(uuid())
+  productoId    String   @map("producto_id")
+  producto      Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  insumoId      String   @map("insumo_id")
+  insumo        Insumo   @relation(fields: [insumoId], references: [id])
+  cantidad      Decimal  @db.Decimal(12, 2)
+  costoSubtotal Decimal  @map("costo_subtotal") @db.Decimal(12, 2)
+
+  @@unique([productoId, insumoId])
+  @@map("producto_insumos")
 }
