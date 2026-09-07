@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UnidadMedidaEnum {
+  gramos
+  mililitros
+  porcion
+  unidades
+}
+
+model Insumo {
+  id                 String           @id @default(uuid())
+  nombre             String           @unique @db.VarChar(150)
+  unidadCompra       UnidadMedidaEnum @map("unidad_compra")
+  precioCompra       Decimal          @map("precio_compra") @db.Decimal(12, 2)
+  rendimientoUnidad  Decimal          @map("rendimiento_unidad") @db.Decimal(12, 2)
+  unidadMedida       UnidadMedidaEnum @map("unidad_medida")
+  costoUnitario      Decimal          @map("costo_unitario") @db.Decimal(12, 2)
+  cantidadDisponible Decimal          @default(0) @map("cantidad_disponible") @db.Decimal(12, 2)
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+
+  // relaciones para luego
+  // recetas            RecetaItem[]
+  // gastos             Gasto[]
+
+  @@index([nombre])
+  @@index([costoUnitario])
+  @@map("insumos")
+}
