@@ -5,6 +5,20 @@ import { CreateInsumoSchema, UpdateInsumoSchema, CreateInsumoInput, UpdateInsumo
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+// Helper para transformar objetos Decimal de Prisma a números puros
+// Esto evita el error de Next.js: "Only plain objects can be passed to Client Components from Server Components"
+function serializeInsumo(insumo: any) {
+  return {
+    ...insumo,
+    precioCompra: Number(insumo.precioCompra),
+    rendimientoUnidad: Number(insumo.rendimientoUnidad),
+    costoUnitario: Number(insumo.costoUnitario),
+    cantidadDisponible: insumo.cantidadDisponible ? Number(insumo.cantidadDisponible) : 0,
+    createdAt: insumo.createdAt.toISOString(),
+    updatedAt: insumo.updatedAt.toISOString(),
+  };
+}
+
 export async function createInsumo(data: CreateInsumoInput) {
   try {
     const validatedData = CreateInsumoSchema.parse(data);
@@ -24,7 +38,7 @@ export async function createInsumo(data: CreateInsumoInput) {
     });
 
     revalidatePath("/inventario/insumos");
-    return { success: true, data: newInsumo };
+    return { success: true, data: serializeInsumo(newInsumo) };
   } catch (error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { success: false, error: "El insumo ya existe" };
@@ -51,7 +65,7 @@ export async function updateInsumo(id: string, data: UpdateInsumoInput) {
     });
 
     revalidatePath("/inventario/insumos");
-    return { success: true, data: updatedInsumo };
+    return { success: true, data: serializeInsumo(updatedInsumo) };
   } catch (error: any) {
     return { success: false, error: error.message || "Error al actualizar el insumo" };
   }
@@ -62,7 +76,7 @@ export async function getInsumos() {
     const insumos = await prisma.insumo.findMany({
       orderBy: { nombre: "asc" },
     });
-    return { success: true, data: insumos };
+    return { success: true, data: insumos.map(serializeInsumo) };
   } catch (error: any) {
     return { success: false, error: "No se pudo cargar el listado de insumos. Intente nuevamente más tarde" };
   }
@@ -91,7 +105,7 @@ export async function getInsumoById(id: string) {
     try {
         const insumo = await prisma.insumo.findUnique({ where: { id } });
         if (!insumo) return { success: false, error: "Insumo no encontrado" };
-        return { success: true, data: insumo };
+        return { success: true, data: serializeInsumo(insumo) };
     } catch(error) {
         return { success: false, error: "Error al cargar el insumo" };
     }
