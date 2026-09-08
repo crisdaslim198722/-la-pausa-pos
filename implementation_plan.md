@@ -1,71 +1,40 @@
-# Plan de Implementación: 01-POS-Mobile-Orders (Toma de Pedidos y Snapshots)
+# Plan de Implementación: Mejoras de Flujo POS (Estados, Nombres y Cobros)
 
-El objetivo de este módulo es la creación de la interfaz táctil del punto de venta (POS) para los baristas. En este paso el negocio cobra vida: cada vez que se vende un producto, se debe descontar inteligentemente el inventario basado en la receta del producto y guardar una "fotografía" histórica de los precios para que la contabilidad nunca se descuadre si los precios cambian en el futuro.
+Este plan aborda los ajustes solicitados para mejorar la experiencia operativa del barista en el día a día.
 
-## User Review Required
-
-- **Ubicación de rutas:** El Spec sugiere `/pos` y `/pos/ordenes`. Crearé estas rutas directamente en la carpeta raíz de `src/app/pos` para que sea fácil acceder desde un dispositivo móvil o tablet.
-
-## Open Questions
-
-Ninguna por el momento. Las reglas de inmutabilidad y descuento de inventario en transacciones atómicas están muy bien definidas.
+## Propuesta de Experiencia (Sugerencia)
+El flujo operativo en una cafetería suele tener dos modalidades: **Paga y Retira** (ej. para llevar) o **Consume y Paga al final** (ej. en mesa). 
+Con tus ajustes, el ciclo de vida de un pedido quedará así:
+1. **Crear Pedido:** El barista toma la orden, anota el nombre (opcional) y el pedido nace en estado `ACTIVO` (Pendiente de preparar).
+2. **Despachar:** Cuando el café está listo y se entrega, el barista presiona "Despachado". El pedido pasa a estado `DESPACHADO` (Pendiente de cobro).
+3. **Cobrar:** Cuando el cliente va a pagar, se presiona "Cobrar", se abre el resumen para verificar, y al confirmar, el estado pasa a `PAGADO`.
 
 ## Proposed Changes
 
----
-
 ### Capa de Datos (Prisma)
-
 #### [MODIFY] prisma/schema.prisma
-- Agregar el enum `PedidoEstado` (`ACTIVO`, `CANCELADO`).
-- Agregar el modelo `Pedido` con totalVenta, costoTotalPedido, gananciaNeta y estado.
-- Agregar el modelo `DetallePedido` (snapshot inmutable) con `cantidadVendida`, `precioVentaHistorico`, y `costoHistorico`.
-- Descomentar la relación `detallesPedido` en el modelo `Producto`.
+- Modificar el enum `PedidoEstado` para que sea: `ACTIVO`, `DESPACHADO`, `PAGADO`, `CANCELADO`.
+- Agregar el campo `nombreCliente String? @map("nombre_cliente")` al modelo `Pedido`.
 
----
+### Capa de Lógica
+#### [MODIFY] src/features/pos/schemas/order.ts
+- Agregar `nombreCliente` (opcional) a `CreateOrderSchema`.
 
-### Capa de Lógica y Validaciones
+#### [MODIFY] src/features/pos/actions/create-order.ts
+- Incluir `nombreCliente` en la creación del `Pedido` en la base de datos.
 
-#### [NEW] src/features/pos/schemas/order.ts
-- Definición de esquemas Zod: `OrderItemSchema` y `CreateOrderSchema`.
-
-#### [NEW] src/features/pos/actions/create-order.ts
-- Server Action `createOrderTransaction(data)`:
-  - Busca los productos solicitados y sus recetas desde la base de datos (para prevenir inyección de precios desde el cliente).
-  - Calcula matemáticamente el total, el costo y la ganancia.
-  - Genera las instrucciones de Prisma para crear el `Pedido` y sus `DetallePedido`.
-  - Recorre las recetas para ejecutar los `UPDATE` al inventario (`cantidadDisponible`) de los Insumos.
-  - Ejecuta todo dentro de un bloque `prisma.$transaction`.
-
-#### [NEW] src/features/pos/actions/get-orders.ts
-- Server Action `getActiveOrders()`: Consulta todos los pedidos ordenados descendentemente por fecha para el reporte del barista.
-
----
+#### [NEW] src/features/pos/actions/update-order.ts
+- Crear un Server Action `updateOrderState(pedidoId, nuevoEstado)` para hacer las transiciones (`ACTIVO` -> `DESPACHADO` -> `PAGADO`).
 
 ### Capa de Presentación (UI)
+#### [MODIFY] src/features/pos/components/POSCartBar.tsx
+- Cambiar el texto del botón de "Cobrar Pedido" a "Crear Pedido".
+- Al presionar el botón, abrir un pequeño Modal (Pop-up) que pida el "Nombre del Cliente (Opcional)" y tenga el botón final de "Confirmar Pedido".
 
-#### [NEW] src/features/pos/components/POSCartContext.tsx
-- Proveedor de Contexto React (Zustand o Context API nativo) para manejar el estado global del carrito de compras en la sesión del usuario sin recargar la página.
-
-#### [NEW] src/features/pos/components/POSProductGrid.tsx
-- Grilla táctil Mobile-First que lista el menú. Productos sin precio (`precioVentaActual = 0`) aparecen bloqueados visualmente.
-
-#### [NEW] src/features/pos/components/POSCartBar.tsx
-- Barra flotante en la parte inferior de la pantalla (típico en apps móviles de delivery/POS) que muestra el total a cobrar y el botón de "Confirmar Pedido".
-
-#### [NEW] src/features/pos/components/ActiveOrdersList.tsx
-- Interfaz para consultar los pedidos confirmados, ver los ítems de cada uno y el acumulado total del turno.
-
-#### Rutas de Next.js
-- **[NEW]** `src/app/pos/page.tsx` (Catálogo y POS).
-- **[NEW]** `src/app/pos/ordenes/page.tsx` (Lista de seguimiento de órdenes activas).
-
-## Verification Plan
-
-### Automated Tests
-- Ejecutaré `npx prisma db push` y `npx prisma generate` para sincronizar los nuevos modelos con Supabase.
-- Ejecutaré `npm run build` para asegurar la compilación limpia.
-
-### Manual Verification
-- Renderizar la interfaz simulando resolución móvil para verificar la experiencia táctil.
-- Probar un checkout "feliz" y verificar que los insumos en la base de datos hayan disminuido exactamente la cantidad requerida en la receta.
+#### [MODIFY] src/features/pos/components/ActiveOrdersList.tsx
+- **Mejora Visual:** Resaltar las cantidades (ej. un círculo rojo con "2x" bien grande al lado de cada producto).
+- **Separación de Estados:** Dividir la lista en 3 secciones claras (o pestañas):
+  - 🟡 **En Preparación (Activos):** Muestra el nombre del cliente y un botón "Marcar como Despachado".
+  - 🟠 **Por Cobrar (Despachados):** Muestra el botón "Cobrar" que levantará un pop-up.
+  - 🟢 **Pagados:** Historial de lo que ya se cobró hoy.
+- **Pop-up de Cobro:** Al hacer clic en "Cobrar" en un pedido despachado, se abrirá un modal con el resumen detallado de la cuenta y el botón verde gigante "Confirmar Pago".

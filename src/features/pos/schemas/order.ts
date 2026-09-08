@@ -9,6 +9,7 @@ export const OrderItemSchema = z.object({
 });
 
 export const CreateOrderSchema = z.object({
+  nombreCliente: z.string().max(100, "Nombre muy largo").optional(),
   items: z
     .array(OrderItemSchema)
     .min(1, "El pedido debe contener al menos 1 producto"),

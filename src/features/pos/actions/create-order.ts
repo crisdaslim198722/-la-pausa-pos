@@ -65,6 +65,7 @@ export async function createOrderTransaction(data: CreateOrderInput) {
       // 3.a. Crear el Pedido y sus Detalles
       await tx.pedido.create({
         data: {
+          nombreCliente: validated.nombreCliente || null,
           totalVenta,
           costoTotalPedido,
           gananciaNeta,

@@ -68,11 +68,14 @@ model RecetaItem {
 }
 enum PedidoEstado {
   ACTIVO
+  DESPACHADO
+  PAGADO
   CANCELADO
 }
 
 model Pedido {
   id               String          @id @default(uuid())
+  nombreCliente    String?         @map("nombre_cliente") @db.VarChar(100)
   fechaHora        DateTime        @default(now()) @map("fecha_hora") @db.Timestamptz
   totalVenta       Decimal         @map("total_venta") @db.Decimal(12, 2)
   costoTotalPedido Decimal         @map("costo_total_pedido") @db.Decimal(12, 2)
