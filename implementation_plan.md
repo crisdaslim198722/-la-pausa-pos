@@ -1,14 +1,15 @@
-# Plan de Implementación: 02-Recipe-Builder (Gestión de Productos y Recetas)
+# Plan de Implementación: 03-Pricing-Margins (Precios de Venta y Márgenes)
 
-El objetivo de este módulo es permitir al usuario armar los productos finales a partir de los insumos que ya se pueden gestionar. Se implementará un constructor de recetas dinámico.
+El objetivo de este módulo es crear una sección independiente donde se asignan y administran los precios de venta de los productos (creados en el spec anterior), calculando automáticamente los márgenes de ganancia en función de los costos de producción vigentes.
 
 ## User Review Required
 
-- En el esquema de Prisma provisto en el Spec 02, se incluye una relación `ordenes DetallePedido[]` en el modelo `Producto`. Sin embargo, `DetallePedido` no ha sido definido aún en la base de datos (presumiblemente será parte de un Spec futuro). **Para evitar errores de Prisma, procederé a comentar temporalmente esa línea.** ¿Estás de acuerdo?
+- **Estructura de Carpetas:** El Spec sugiere rutas bajo `src/app/(dashboard)/inventario/precios/...` Sin embargo, en la aplicación actual no estamos usando `(dashboard)`. Las implementaré en `src/app/inventario/precios/...` para mantener la coherencia.
+- **Relación con Ventas Históricas:** Por diseño, la inmutabilidad de los precios en pedidos pasados (`DetallePedido`) está cubierta, pero como ese módulo no existe aún, nos concentraremos en asegurar que la actualización a `Producto` no toque nada más.
 
 ## Open Questions
 
-- Ninguna pregunta por ahora. El Spec 02 es bastante detallado.
+Ninguna por el momento. El Spec es suficientemente detallado.
 
 ## Proposed Changes
 
@@ -16,56 +17,51 @@ El objetivo de este módulo es permitir al usuario armar los productos finales a
 
 ### Capa de Datos (Prisma)
 
-#### [MODIFY] schema.prisma
-- Se agregarán los modelos `Producto` y `RecetaItem` con la relación de clave foránea al `Insumo` y las configuraciones de decimales `Decimal(12, 2)`.
+#### [MODIFY] prisma/schema.prisma
+- Se agregará la columna `precioVentaActual Decimal @default(0) @map("precio_venta_actual") @db.Decimal(12, 2)` al modelo `Producto`.
 
 ---
 
 ### Capa de Lógica y Validaciones
 
-#### [NEW] src/features/inventory/schemas/producto.ts
-- Se definirán los esquemas Zod `ItemRecetaSchema`, `CreateProductoSchema` y `UpdateProductoSchema`.
+#### [NEW] src/features/inventory/schemas/pricing.ts
+- Se definirá el esquema Zod `SetPrecioVentaSchema` para validar que el precio sea mayor a 0.
 
-#### [NEW] src/features/inventory/actions/producto-actions.ts
+#### [NEW] src/features/inventory/actions/pricing-actions.ts
 - Creación de Server Actions:
-  - `createProducto`: Valida nombre único, recalcula `costoTotal` desde la BD y crea en transacción.
-  - `updateProducto`: Actualiza receta (limpiando y recreando `RecetaItem`), recalcula `costoTotal`.
-  - `getProductos`: Lista productos con el count de insumos `_count: { receta: true }`.
-  - `getProductoById`: Trae producto con sus items de receta e insumos populados.
+  - `setPrecioVenta(productoId, precioVentaActual)`: Actualiza el precio del producto en la BD.
+  - `getPreciosProductosList()`: Devuelve todos los productos con su `costoTotal` y `precioVentaActual`.
 
 ---
 
 ### Capa de Presentación (UI)
 
-#### [NEW] src/features/inventory/components/RecipeBuilder.tsx
-- Componente de formulario altamente interactivo para construir la receta:
-  - Manejo dinámico de filas (agregar/eliminar `ItemReceta`).
-  - Selector de Insumos (deshabilitando los ya seleccionados).
-  - Cálculo instantáneo Reactivo del `costoTotal`.
-  - Modal de confirmación al eliminar un insumo de la receta.
-
-#### [NEW] src/features/inventory/components/ProductoTable.tsx
+#### [NEW] src/features/inventory/components/PricingListTable.tsx
 - Tabla o lista de productos con:
-  - Buscador de texto en tiempo real.
-  - Selector de ordenamiento (A-Z, Costo, etc).
-  - Badge indicando el conteo de ingredientes.
+  - Buscador de texto en tiempo real y selectores de ordenamiento.
+  - Columnas matemáticas: Costo Total, Precio de Venta, Margen Absoluto ($) y Margen Relativo (%).
+  - Alertas visuales (ej. fila roja si el margen es negativo, o badge si no hay precio).
 
-#### [NEW] src/app/productos/page.tsx
-- Página de listado principal.
-*(Nota: Aunque en el Spec original no se especifica si va en `/productos` o `/inventario/productos`, asumiré `/productos` basado en el texto del spec "rutas de Next.js (`/productos`)").*
+#### [NEW] src/features/inventory/components/PrecioForm.tsx
+- Formulario de asignación/edición interactivo:
+  - Campos de sólo lectura (Nombre, Receta, Costo Total).
+  - Campo de input numérico para "Precio de Venta".
+  - Simulador de rentabilidad reactivo (calcula el % en tiempo real mientras el usuario escribe).
 
-#### [NEW] src/app/productos/crear/page.tsx
-- Página para alojar `<RecipeBuilder />` vacío.
+#### [NEW] src/app/inventario/precios/page.tsx
+- Página de listado principal de la gestión comercial de precios.
 
-#### [NEW] src/app/productos/[id]/editar/page.tsx
-- Página para alojar `<RecipeBuilder />` con datos pre-cargados (nombre bloqueado).
+#### [NEW] src/app/inventario/precios/crear/[id]/page.tsx
+- Página para alojar `<PrecioForm />` en modo inicial.
+
+#### [NEW] src/app/inventario/precios/editar/[id]/page.tsx
+- Página para alojar `<PrecioForm />` en modo actualización.
 
 ## Verification Plan
 
 ### Automated Tests
-- Ejecutaré `npx prisma db push` y `npx prisma generate`.
-- Ejecutaré `npm run build` para garantizar que la compilación de TypeScript de Next.js (`tsc --noEmit` implícito) pase sin errores.
+- Ejecutaré `npx prisma db push` y `npx prisma generate` para aplicar la nueva columna a Supabase.
+- Ejecutaré `npm run build` para asegurar que todo pasa el Type-checker de TypeScript en la fase de compilación.
 
 ### Manual Verification
-- Visualización de UI en la versión local.
-- Hacer deploy local/remoto para verificar que el cálculo de `costoTotal` y las validaciones del array de Zod funcionen en la interfaz del cliente.
+- Ingresaré visualmente al entorno local y comprobaré la reactividad de la fórmula `((PrecioVenta - Costo) / PrecioVenta) * 100` en el formulario.

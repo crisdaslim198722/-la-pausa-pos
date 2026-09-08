@@ -1,8 +1,8 @@
-- [ ] Paso 1: Actualizar `schema.prisma` con `Producto` y `RecetaItem`.
+- [ ] Paso 1: Actualizar `schema.prisma` agregando `precioVentaActual` al modelo `Producto`.
 - [ ] Paso 2: Ejecutar `prisma db push` y `prisma generate`.
-- [ ] Paso 3: Crear esquemas Zod en `src/features/inventory/schemas/producto.ts`.
-- [ ] Paso 4: Crear Server Actions en `src/features/inventory/actions/producto-actions.ts`.
-- [ ] Paso 5: Crear componente UI `<RecipeBuilder />`.
-- [ ] Paso 6: Crear componente UI `<ProductoTable />`.
-- [ ] Paso 7: Ensamblar rutas de Next.js (`/productos`, `/productos/crear`, `/productos/[id]/editar`).
-- [ ] Paso 8: Correr chequeo de `npm run build` para asegurar la calidad.
+- [ ] Paso 3: Crear esquema Zod en `src/features/inventory/schemas/pricing.ts`.
+- [ ] Paso 4: Crear Server Actions en `src/features/inventory/actions/pricing-actions.ts`.
+- [ ] Paso 5: Crear componente UI `<PricingListTable />` (Listado con márgenes en tiempo real).
+- [ ] Paso 6: Crear componente UI `<PrecioForm />` (Formulario reactivo de precios y rentabilidad).
+- [ ] Paso 7: Crear rutas en Next.js (`/inventario/precios`, `/inventario/precios/crear/[id]`, `/inventario/precios/editar/[id]`).
+- [ ] Paso 8: Ejecutar `npm run build` para verificación final.

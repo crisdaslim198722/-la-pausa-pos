@@ -39,11 +39,12 @@ model Insumo {
   @@map("insumos")
 }
 model Producto {
-  id         String       @id @default(uuid())
-  nombre     String       @unique @db.VarChar(150)
-  costoTotal Decimal      @map("costo_total") @db.Decimal(12, 2)
-  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  id                String       @id @default(uuid())
+  nombre            String       @unique @db.VarChar(150)
+  costoTotal        Decimal      @map("costo_total") @db.Decimal(12, 2)
+  precioVentaActual Decimal      @default(0) @map("precio_venta_actual") @db.Decimal(12, 2)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz
 
   receta     RecetaItem[]
   // ordenes    DetallePedido[]
