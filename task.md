@@ -1,8 +1,9 @@
-- [ ] Paso 1: Actualizar `schema.prisma` agregando `precioVentaActual` al modelo `Producto`.
+- [ ] Paso 1: Actualizar `schema.prisma` con enum `PedidoEstado`, modelos `Pedido` y `DetallePedido`.
 - [ ] Paso 2: Ejecutar `prisma db push` y `prisma generate`.
-- [ ] Paso 3: Crear esquema Zod en `src/features/inventory/schemas/pricing.ts`.
-- [ ] Paso 4: Crear Server Actions en `src/features/inventory/actions/pricing-actions.ts`.
-- [ ] Paso 5: Crear componente UI `<PricingListTable />` (Listado con márgenes en tiempo real).
-- [ ] Paso 6: Crear componente UI `<PrecioForm />` (Formulario reactivo de precios y rentabilidad).
-- [ ] Paso 7: Crear rutas en Next.js (`/inventario/precios`, `/inventario/precios/crear/[id]`, `/inventario/precios/editar/[id]`).
-- [ ] Paso 8: Ejecutar `npm run build` para verificación final.
+- [ ] Paso 3: Crear esquema Zod en `src/features/pos/schemas/order.ts`.
+- [ ] Paso 4: Crear Server Actions en `src/features/pos/actions/create-order.ts` y `get-orders.ts`.
+- [ ] Paso 5: Implementar `<POSCartContext />`.
+- [ ] Paso 6: Implementar `<POSProductGrid />` y `<POSCartBar />`.
+- [ ] Paso 7: Implementar `<ActiveOrdersList />`.
+- [ ] Paso 8: Ensamblar páginas `src/app/pos/page.tsx` y `src/app/pos/ordenes/page.tsx`.
+- [ ] Paso 9: Ejecutar `npm run build`.

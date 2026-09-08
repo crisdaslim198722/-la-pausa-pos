@@ -46,8 +46,8 @@ model Producto {
   createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz
 
-  receta     RecetaItem[]
-  // ordenes    DetallePedido[]
+  receta         RecetaItem[]
+  detallesPedido DetallePedido[]
 
   @@index([nombre])
   @@index([costoTotal])
@@ -65,4 +65,34 @@ model RecetaItem {
 
   @@unique([productoId, insumoId])
   @@map("producto_insumos")
+}
+enum PedidoEstado {
+  ACTIVO
+  CANCELADO
+}
+
+model Pedido {
+  id               String          @id @default(uuid())
+  fechaHora        DateTime        @default(now()) @map("fecha_hora") @db.Timestamptz
+  totalVenta       Decimal         @map("total_venta") @db.Decimal(12, 2)
+  costoTotalPedido Decimal         @map("costo_total_pedido") @db.Decimal(12, 2)
+  gananciaNeta     Decimal         @map("ganancia_neta") @db.Decimal(12, 2)
+  estado           PedidoEstado    @default(ACTIVO)
+
+  detalles         DetallePedido[]
+
+  @@map("pedidos")
+}
+
+model DetallePedido {
+  id                   String   @id @default(uuid())
+  pedidoId             String   @map("pedido_id")
+  pedido               Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId           String   @map("producto_id")
+  producto             Producto @relation(fields: [productoId], references: [id])
+  cantidadVendida      Int      @map("cantidad_vendida")
+  precioVentaHistorico Decimal  @map("precio_venta_historico") @db.Decimal(12, 2)
+  costoHistorico       Decimal  @map("costo_historico") @db.Decimal(12, 2)
+
+  @@map("detalle_pedidos")
 }

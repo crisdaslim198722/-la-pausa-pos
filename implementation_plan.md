@@ -1,15 +1,14 @@
-# Plan de Implementación: 03-Pricing-Margins (Precios de Venta y Márgenes)
+# Plan de Implementación: 01-POS-Mobile-Orders (Toma de Pedidos y Snapshots)
 
-El objetivo de este módulo es crear una sección independiente donde se asignan y administran los precios de venta de los productos (creados en el spec anterior), calculando automáticamente los márgenes de ganancia en función de los costos de producción vigentes.
+El objetivo de este módulo es la creación de la interfaz táctil del punto de venta (POS) para los baristas. En este paso el negocio cobra vida: cada vez que se vende un producto, se debe descontar inteligentemente el inventario basado en la receta del producto y guardar una "fotografía" histórica de los precios para que la contabilidad nunca se descuadre si los precios cambian en el futuro.
 
 ## User Review Required
 
-- **Estructura de Carpetas:** El Spec sugiere rutas bajo `src/app/(dashboard)/inventario/precios/...` Sin embargo, en la aplicación actual no estamos usando `(dashboard)`. Las implementaré en `src/app/inventario/precios/...` para mantener la coherencia.
-- **Relación con Ventas Históricas:** Por diseño, la inmutabilidad de los precios en pedidos pasados (`DetallePedido`) está cubierta, pero como ese módulo no existe aún, nos concentraremos en asegurar que la actualización a `Producto` no toque nada más.
+- **Ubicación de rutas:** El Spec sugiere `/pos` y `/pos/ordenes`. Crearé estas rutas directamente en la carpeta raíz de `src/app/pos` para que sea fácil acceder desde un dispositivo móvil o tablet.
 
 ## Open Questions
 
-Ninguna por el momento. El Spec es suficientemente detallado.
+Ninguna por el momento. Las reglas de inmutabilidad y descuento de inventario en transacciones atómicas están muy bien definidas.
 
 ## Proposed Changes
 
@@ -18,50 +17,55 @@ Ninguna por el momento. El Spec es suficientemente detallado.
 ### Capa de Datos (Prisma)
 
 #### [MODIFY] prisma/schema.prisma
-- Se agregará la columna `precioVentaActual Decimal @default(0) @map("precio_venta_actual") @db.Decimal(12, 2)` al modelo `Producto`.
+- Agregar el enum `PedidoEstado` (`ACTIVO`, `CANCELADO`).
+- Agregar el modelo `Pedido` con totalVenta, costoTotalPedido, gananciaNeta y estado.
+- Agregar el modelo `DetallePedido` (snapshot inmutable) con `cantidadVendida`, `precioVentaHistorico`, y `costoHistorico`.
+- Descomentar la relación `detallesPedido` en el modelo `Producto`.
 
 ---
 
 ### Capa de Lógica y Validaciones
 
-#### [NEW] src/features/inventory/schemas/pricing.ts
-- Se definirá el esquema Zod `SetPrecioVentaSchema` para validar que el precio sea mayor a 0.
+#### [NEW] src/features/pos/schemas/order.ts
+- Definición de esquemas Zod: `OrderItemSchema` y `CreateOrderSchema`.
 
-#### [NEW] src/features/inventory/actions/pricing-actions.ts
-- Creación de Server Actions:
-  - `setPrecioVenta(productoId, precioVentaActual)`: Actualiza el precio del producto en la BD.
-  - `getPreciosProductosList()`: Devuelve todos los productos con su `costoTotal` y `precioVentaActual`.
+#### [NEW] src/features/pos/actions/create-order.ts
+- Server Action `createOrderTransaction(data)`:
+  - Busca los productos solicitados y sus recetas desde la base de datos (para prevenir inyección de precios desde el cliente).
+  - Calcula matemáticamente el total, el costo y la ganancia.
+  - Genera las instrucciones de Prisma para crear el `Pedido` y sus `DetallePedido`.
+  - Recorre las recetas para ejecutar los `UPDATE` al inventario (`cantidadDisponible`) de los Insumos.
+  - Ejecuta todo dentro de un bloque `prisma.$transaction`.
+
+#### [NEW] src/features/pos/actions/get-orders.ts
+- Server Action `getActiveOrders()`: Consulta todos los pedidos ordenados descendentemente por fecha para el reporte del barista.
 
 ---
 
 ### Capa de Presentación (UI)
 
-#### [NEW] src/features/inventory/components/PricingListTable.tsx
-- Tabla o lista de productos con:
-  - Buscador de texto en tiempo real y selectores de ordenamiento.
-  - Columnas matemáticas: Costo Total, Precio de Venta, Margen Absoluto ($) y Margen Relativo (%).
-  - Alertas visuales (ej. fila roja si el margen es negativo, o badge si no hay precio).
+#### [NEW] src/features/pos/components/POSCartContext.tsx
+- Proveedor de Contexto React (Zustand o Context API nativo) para manejar el estado global del carrito de compras en la sesión del usuario sin recargar la página.
 
-#### [NEW] src/features/inventory/components/PrecioForm.tsx
-- Formulario de asignación/edición interactivo:
-  - Campos de sólo lectura (Nombre, Receta, Costo Total).
-  - Campo de input numérico para "Precio de Venta".
-  - Simulador de rentabilidad reactivo (calcula el % en tiempo real mientras el usuario escribe).
+#### [NEW] src/features/pos/components/POSProductGrid.tsx
+- Grilla táctil Mobile-First que lista el menú. Productos sin precio (`precioVentaActual = 0`) aparecen bloqueados visualmente.
 
-#### [NEW] src/app/inventario/precios/page.tsx
-- Página de listado principal de la gestión comercial de precios.
+#### [NEW] src/features/pos/components/POSCartBar.tsx
+- Barra flotante en la parte inferior de la pantalla (típico en apps móviles de delivery/POS) que muestra el total a cobrar y el botón de "Confirmar Pedido".
 
-#### [NEW] src/app/inventario/precios/crear/[id]/page.tsx
-- Página para alojar `<PrecioForm />` en modo inicial.
+#### [NEW] src/features/pos/components/ActiveOrdersList.tsx
+- Interfaz para consultar los pedidos confirmados, ver los ítems de cada uno y el acumulado total del turno.
 
-#### [NEW] src/app/inventario/precios/editar/[id]/page.tsx
-- Página para alojar `<PrecioForm />` en modo actualización.
+#### Rutas de Next.js
+- **[NEW]** `src/app/pos/page.tsx` (Catálogo y POS).
+- **[NEW]** `src/app/pos/ordenes/page.tsx` (Lista de seguimiento de órdenes activas).
 
 ## Verification Plan
 
 ### Automated Tests
-- Ejecutaré `npx prisma db push` y `npx prisma generate` para aplicar la nueva columna a Supabase.
-- Ejecutaré `npm run build` para asegurar que todo pasa el Type-checker de TypeScript en la fase de compilación.
+- Ejecutaré `npx prisma db push` y `npx prisma generate` para sincronizar los nuevos modelos con Supabase.
+- Ejecutaré `npm run build` para asegurar la compilación limpia.
 
 ### Manual Verification
-- Ingresaré visualmente al entorno local y comprobaré la reactividad de la fórmula `((PrecioVenta - Costo) / PrecioVenta) * 100` en el formulario.
+- Renderizar la interfaz simulando resolución móvil para verificar la experiencia táctil.
+- Probar un checkout "feliz" y verificar que los insumos en la base de datos hayan disminuido exactamente la cantidad requerida en la receta.
