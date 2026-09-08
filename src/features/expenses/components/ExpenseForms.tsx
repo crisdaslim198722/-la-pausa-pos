@@ -91,9 +91,7 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">
-            Cantidad {selectedInsumo && <span className="text-[#3e664f]">({selectedInsumo.unidadCompra})</span>}
-          </label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">Cantidad Comprada</label>
           <input
             type="number"
             step="0.01"
@@ -118,6 +116,14 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
           />
         </div>
       </div>
+
+      {selectedInsumo && (
+        <div className="bg-[#e8f0eb] border border-[#3e664f]/20 rounded-lg p-3 text-sm text-[#2c4c3b]">
+          💡 Estás registrando esta compra en <strong>{selectedInsumo.unidadCompra}</strong>. 
+          Si compraste por ejemplo un kilo y medio, simplemente ingresa <strong>1.5</strong>. 
+          El sistema se encargará de convertirlo automáticamente.
+        </div>
+      )}
 
       <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
         <input 
