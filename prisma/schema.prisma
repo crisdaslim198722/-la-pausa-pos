@@ -30,9 +30,8 @@ model Insumo {
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
 
-  // relaciones para luego
   recetas            RecetaItem[]
-  // gastos             Gasto[]
+  gastos             Gasto[]
 
   @@index([nombre])
   @@index([costoUnitario])
@@ -98,4 +97,24 @@ model DetallePedido {
   costoHistorico       Decimal  @map("costo_historico") @db.Decimal(12, 2)
 
   @@map("detalle_pedidos")
+}
+
+enum TipoGasto {
+  COMPRA_INSUMO
+  OPERATIVO
+}
+
+model Gasto {
+  id               String    @id @default(uuid())
+  tipo             TipoGasto @map("tipo_gasto")
+  descripcion      String    @db.VarChar(200)
+  montoTotal       Decimal   @map("monto_total") @db.Decimal(12, 2)
+  fechaHora        DateTime  @default(now()) @map("fecha_hora") @db.Timestamptz
+  
+  insumoId         String?   @map("insumo_id")
+  insumo           Insumo?   @relation(fields: [insumoId], references: [id])
+  cantidadComprada Decimal?  @map("cantidad_comprada") @db.Decimal(10, 2)
+
+  @@index([fechaHora])
+  @@map("gastos")
 }

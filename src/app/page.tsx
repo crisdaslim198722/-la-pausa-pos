@@ -7,6 +7,7 @@ import {
   BookOpen, 
   Calculator, 
   TrendingUp,
+  TrendingDown,
   Store,
   ChevronRight
 } from "lucide-react";
@@ -127,6 +128,15 @@ export default async function MainDashboardPage() {
               <h2 className="text-xl font-bold text-gray-800">Finanzas</h2>
             </div>
 
+            <DashboardCard 
+              href="/gastos"
+              title="Gastos y Compras"
+              description="Inyección de stock e historial de egresos."
+              icon={<TrendingDown className="w-6 h-6 text-[#2b5a82]" />}
+              colorClass="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800"
+              iconBg="bg-[#e6eef5]"
+            />
+            
             <DashboardCard 
               href="/inventario/precios"
               title="Precios y Márgenes"

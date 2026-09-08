@@ -1,6 +1,8 @@
-- [ ] Paso 1: Crear Server Action `getFinancialMetrics(startDate, endDate)` en `src/features/reports/actions/get-closure.ts`.
-- [ ] Paso 2: Crear componente de filtros de fecha `DateRangeFilter.tsx`.
-- [ ] Paso 3: Crear componente de tarjetas financieras `MetricsCards.tsx`.
-- [ ] Paso 4: Crear tabla de ranking `BestSellersTable.tsx`.
-- [ ] Paso 5: Ensamblar página en `src/app/reportes/page.tsx`.
-- [ ] Paso 6: Ejecutar `npm run build` para validar.
+- [ ] Paso 1: Actualizar `schema.prisma` agregando el modelo `Gasto` y enum `TipoGasto`.
+- [ ] Paso 2: Crear carpetas de features y rutas para `gastos`.
+- [ ] Paso 3: Crear `schema.ts` (Zod) para gastos.
+- [ ] Paso 4: Crear Server Actions en `expense-actions.ts`.
+- [ ] Paso 5: Implementar los componentes UI de formularios.
+- [ ] Paso 6: Implementar el listado de gastos y ensamblar la página `/gastos`.
+- [ ] Paso 7: Agregar el acceso directo en el `MainDashboard` (`/`).
+- [ ] Paso 8: Ejecutar `npm run build` para validar y pedirle al usuario que regenere Prisma.
