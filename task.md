@@ -1,9 +1,6 @@
-- [ ] Paso 1: Actualizar `schema.prisma` con enum `PedidoEstado`, modelos `Pedido` y `DetallePedido`.
-- [ ] Paso 2: Ejecutar `prisma db push` y `prisma generate`.
-- [ ] Paso 3: Crear esquema Zod en `src/features/pos/schemas/order.ts`.
-- [ ] Paso 4: Crear Server Actions en `src/features/pos/actions/create-order.ts` y `get-orders.ts`.
-- [ ] Paso 5: Implementar `<POSCartContext />`.
-- [ ] Paso 6: Implementar `<POSProductGrid />` y `<POSCartBar />`.
-- [ ] Paso 7: Implementar `<ActiveOrdersList />`.
-- [ ] Paso 8: Ensamblar páginas `src/app/pos/page.tsx` y `src/app/pos/ordenes/page.tsx`.
-- [ ] Paso 9: Ejecutar `npm run build`.
+- [ ] Paso 1: Crear Server Action `getFinancialMetrics(startDate, endDate)` en `src/features/reports/actions/get-closure.ts`.
+- [ ] Paso 2: Crear componente de filtros de fecha `DateRangeFilter.tsx`.
+- [ ] Paso 3: Crear componente de tarjetas financieras `MetricsCards.tsx`.
+- [ ] Paso 4: Crear tabla de ranking `BestSellersTable.tsx`.
+- [ ] Paso 5: Ensamblar página en `src/app/reportes/page.tsx`.
+- [ ] Paso 6: Ejecutar `npm run build` para validar.

@@ -1,40 +1,52 @@
-# Plan de Implementación: Mejoras de Flujo POS (Estados, Nombres y Cobros)
+# Plan de Implementación: 02-Daily-Closure-Dashboard (Reporte Financiero y Cierres)
 
-Este plan aborda los ajustes solicitados para mejorar la experiencia operativa del barista en el día a día.
+El objetivo de este módulo es proporcionar al administrador una visión financiera clara de la operación. A partir de las órdenes registradas en el POS, el sistema calculará cuánto se vendió, cuánto costó producirlo y la ganancia real.
 
-## Propuesta de Experiencia (Sugerencia)
-El flujo operativo en una cafetería suele tener dos modalidades: **Paga y Retira** (ej. para llevar) o **Consume y Paga al final** (ej. en mesa). 
-Con tus ajustes, el ciclo de vida de un pedido quedará así:
-1. **Crear Pedido:** El barista toma la orden, anota el nombre (opcional) y el pedido nace en estado `ACTIVO` (Pendiente de preparar).
-2. **Despachar:** Cuando el café está listo y se entrega, el barista presiona "Despachado". El pedido pasa a estado `DESPACHADO` (Pendiente de cobro).
-3. **Cobrar:** Cuando el cliente va a pagar, se presiona "Cobrar", se abre el resumen para verificar, y al confirmar, el estado pasa a `PAGADO`.
+## Mejoras Funcionales y de Experiencia (Propuestas)
 
-## Proposed Changes
+Además de tus **filtros de fechas**, he analizado el Spec y propongo agregar las siguientes mejoras operativas invaluables para una cafetería:
 
-### Capa de Datos (Prisma)
-#### [MODIFY] prisma/schema.prisma
-- Modificar el enum `PedidoEstado` para que sea: `ACTIVO`, `DESPACHADO`, `PAGADO`, `CANCELADO`.
-- Agregar el campo `nombreCliente String? @map("nombre_cliente")` al modelo `Pedido`.
+1. **Filtro de Rangos de Fecha:** Implementaremos un selector de fecha de inicio y fin, junto con botones rápidos ("Hoy", "Ayer", "Últimos 7 días", "Este Mes").
+2. **Top Productos Más Vendidos:** Una pequeña tabla que agrupe y cuente qué productos se vendieron más en ese rango de tiempo. Es vital para saber qué insumos reabastecer.
+3. **Métrica de Margen Promedio (%):** Además del dinero en efectivo, mostrar el porcentaje de rentabilidad global del rango de tiempo `(Ganancia Neta / Ventas) * 100`.
+4. **Alineación con los Nuevos Estados:** Solo sumaremos a las "Ventas" y "Ganancias" los pedidos en estado `PAGADO`. Crearemos un pequeño indicador separado para el dinero "Pendiente de Cobro" (pedidos Activos/Despachados).
 
-### Capa de Lógica
-#### [MODIFY] src/features/pos/schemas/order.ts
-- Agregar `nombreCliente` (opcional) a `CreateOrderSchema`.
+## Propuesta de Cambios (Proposed Changes)
 
-#### [MODIFY] src/features/pos/actions/create-order.ts
-- Incluir `nombreCliente` en la creación del `Pedido` en la base de datos.
+---
 
-#### [NEW] src/features/pos/actions/update-order.ts
-- Crear un Server Action `updateOrderState(pedidoId, nuevoEstado)` para hacer las transiciones (`ACTIVO` -> `DESPACHADO` -> `PAGADO`).
+### Capa de Lógica y Base de Datos
+
+#### [NEW] src/features/reports/actions/get-closure.ts
+- Server Action `getFinancialMetrics(startDate, endDate)`:
+  - Consultar los pedidos (`PAGADO`, `ACTIVO`, `DESPACHADO`) dentro del rango de tiempo.
+  - Retornar las sumatorias de:
+    - **Ventas Totales** (Solo `PAGADO`).
+    - **Costo Total de Producción** (Solo `PAGADO`).
+    - **Ganancia Neta** (Solo `PAGADO`).
+    - **Dinero Pendiente** (Suma de `ACTIVO` y `DESPACHADO`).
+  - Agrupar los `detalles` para contar la cantidad vendida de cada producto y generar el ranking del Top 5.
+
+---
 
 ### Capa de Presentación (UI)
-#### [MODIFY] src/features/pos/components/POSCartBar.tsx
-- Cambiar el texto del botón de "Cobrar Pedido" a "Crear Pedido".
-- Al presionar el botón, abrir un pequeño Modal (Pop-up) que pida el "Nombre del Cliente (Opcional)" y tenga el botón final de "Confirmar Pedido".
 
-#### [MODIFY] src/features/pos/components/ActiveOrdersList.tsx
-- **Mejora Visual:** Resaltar las cantidades (ej. un círculo rojo con "2x" bien grande al lado de cada producto).
-- **Separación de Estados:** Dividir la lista en 3 secciones claras (o pestañas):
-  - 🟡 **En Preparación (Activos):** Muestra el nombre del cliente y un botón "Marcar como Despachado".
-  - 🟠 **Por Cobrar (Despachados):** Muestra el botón "Cobrar" que levantará un pop-up.
-  - 🟢 **Pagados:** Historial de lo que ya se cobró hoy.
-- **Pop-up de Cobro:** Al hacer clic en "Cobrar" en un pedido despachado, se abrirá un modal con el resumen detallado de la cuenta y el botón verde gigante "Confirmar Pago".
+#### [NEW] src/features/reports/components/DateRangeFilter.tsx
+- Un componente interactivo de calendario (o selects nativos de fecha `type="date"`) para elegir Rango Desde/Hasta y botones rápidos.
+
+#### [NEW] src/features/reports/components/MetricsCards.tsx
+- Tarjetas visuales grandes para:
+  - Ingresos Totales (Verde)
+  - Costo de Producción (Rojo/Naranja)
+  - Ganancia Neta (Verde Oscuro)
+  - Margen Promedio (%) (Badge)
+
+#### [NEW] src/features/reports/components/BestSellersTable.tsx
+- Tabla o lista sencilla mostrando: `Producto | Cantidad Vendida | Ingreso Generado`.
+
+#### [NEW] src/app/reportes/page.tsx
+- La página principal del Dashboard (`/reportes` o `/cierre`). Ensambla los filtros, las tarjetas, la tabla de productos más vendidos y un listado opcional de los tickets/órdenes de ese periodo.
+
+## Plan de Verificación
+- Simular un filtro del día de "Hoy" y comprobar que coincida matemáticamente con las órdenes que se despacharon y pagaron desde el POS.
+- Ejecutar compilación de Next.js (`npm run build`) para verificar la seguridad de tipos.
