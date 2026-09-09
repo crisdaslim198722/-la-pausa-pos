@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Edit2, Search, DollarSign, AlertCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface ProductoPrecio {
   id: string;
@@ -91,7 +92,7 @@ export function PricingListTable({ productos }: Props) {
                     className={`border-b border-gray-100 hover:bg-gray-50/50 ${isMargenNegativo ? 'bg-red-50/30' : ''}`}
                   >
                     <td className="p-3 text-[#6E6C41] font-bold capitalize">{producto.nombre}</td>
-                    <td className="p-3 text-gray-600 font-medium">${producto.costoTotal.toFixed(2)}</td>
+                    <td className="p-3 text-gray-600 font-medium">{formatCurrency(producto.costoTotal)}</td>
                     <td className="p-3">
                       {isSinPrecio ? (
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-800">
@@ -99,14 +100,14 @@ export function PricingListTable({ productos }: Props) {
                         </span>
                       ) : (
                         <span className="font-bold text-[#A13E21] text-lg">
-                          ${producto.precioVentaActual.toFixed(2)}
+                          {formatCurrency(producto.precioVentaActual)}
                         </span>
                       )}
                     </td>
                     <td className="p-3">
                       {!isSinPrecio && (
                         <span className={`font-medium ${isMargenNegativo ? 'text-red-600' : 'text-green-600'}`}>
-                          ${producto.margenAbsoluto.toFixed(2)}
+                          {formatCurrency(producto.margenAbsoluto)}
                         </span>
                       )}
                     </td>

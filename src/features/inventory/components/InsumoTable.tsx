@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Edit2, Search } from "lucide-react";
+import { Edit2, PackagePlus, Search } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface Insumo {
   id: string;
@@ -102,10 +103,10 @@ export function InsumoTable({ insumos }: Props) {
                 <tr key={insumo.id} className="border-b border-gray-100 hover:bg-gray-50/50">
                   <td className="p-3 text-[#6E6C41] font-medium capitalize">{insumo.nombre}</td>
                   <td className="p-3 text-gray-600 hidden sm:table-cell capitalize">{insumo.unidadCompra}</td>
-                  <td className="p-3 text-gray-600">${Number(insumo.precioCompra).toLocaleString()}</td>
+                  <td className="p-3 text-gray-600 font-medium">{formatCurrency(Number(insumo.precioCompra))}</td>
                   <td className="p-3 text-gray-600 hidden md:table-cell">{Number(insumo.rendimientoUnidad)}</td>
                   <td className="p-3 text-gray-600 hidden sm:table-cell capitalize">{insumo.unidadMedida}</td>
-                  <td className="p-3 text-[#A13E21] font-semibold">${Number(insumo.costoUnitario).toFixed(2)}</td>
+                  <td className="p-3 text-[#A13E21] font-semibold">{formatCurrency(Number(insumo.costoUnitario))}</td>
                   <td className="p-3 text-center">
                     <Link
                       href={`/inventario/insumos/${insumo.id}/editar`}

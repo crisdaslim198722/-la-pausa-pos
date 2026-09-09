@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { createInsumo, updateInsumo } from "../actions/insumo-actions";
@@ -109,14 +110,12 @@ export function InsumoForm({ initialData }: InsumoFormProps) {
         <div>
           <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Precio de compra</label>
           <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500">$</span>
-            <input
-              type="number"
-              step="0.01"
+            <span className="absolute left-3 top-2.5 text-gray-500 font-bold">$</span>
+            <CurrencyInput
+              id="precioCompra"
               required
-              min="0"
-              value={precioCompra}
-              onChange={(e) => setPrecioCompra(e.target.value === "" ? "" : Number(e.target.value))}
+              value={typeof precioCompra === 'number' ? precioCompra : 0}
+              onChange={(val) => setPrecioCompra(val)}
               className="w-full p-2 pl-7 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none"
             />
           </div>
@@ -150,7 +149,7 @@ export function InsumoForm({ initialData }: InsumoFormProps) {
 
         <div className="col-span-1 md:col-span-2 mt-4 p-4 bg-[#B8CCC5]/30 rounded flex justify-between items-center border border-[#B8CCC5]/50">
           <span className="text-[#6E6C41] font-semibold">Costo Unitario Calculado:</span>
-          <span className="text-xl font-bold text-[#A13E21]">${costoUnitario} / {unidadMedida}</span>
+          <span className="text-xl font-bold text-[#A13E21]">${Number(costoUnitario).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} / {unidadMedida}</span>
         </div>
       </div>
 

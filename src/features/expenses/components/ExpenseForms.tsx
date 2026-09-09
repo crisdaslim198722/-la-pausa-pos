@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createInsumoPurchaseTransaction, createOperativeExpense } from "../actions/expense-actions";
 import toast from "react-hot-toast";
 import { PackageSearch, Receipt, Loader2 } from "lucide-react";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 interface InsumoOption {
   id: string;
@@ -104,17 +105,17 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#3e664f] outline-none disabled:bg-gray-100"
           />
         </div>
-        <div>
+        <div className="relative">
           <label className="block text-sm font-bold text-gray-700 mb-1">Monto Pagado ($)</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={monto}
-            onChange={(e) => setMonto(e.target.value)}
-            placeholder="Ej. 15000"
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#3e664f] outline-none"
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-3.5 text-gray-500 font-bold">$</span>
+            <CurrencyInput
+              id="montoInsumo"
+              value={monto === "" ? 0 : Number(monto)}
+              onChange={(val) => setMonto(val.toString())}
+              className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:border-[#3e664f] outline-none"
+            />
+          </div>
         </div>
       </div>
 
@@ -192,17 +193,17 @@ function OperativeForm() {
         />
       </div>
 
-      <div>
+      <div className="relative">
         <label className="block text-sm font-bold text-gray-700 mb-1">Monto Pagado ($)</label>
-        <input
-          type="number"
-          step="0.01"
-          min="0.01"
-          value={monto}
-          onChange={(e) => setMonto(e.target.value)}
-          placeholder="Ej. 45000"
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-[#A13E21] outline-none"
-        />
+        <div className="relative">
+          <span className="absolute left-4 top-3.5 text-gray-500 font-bold">$</span>
+          <CurrencyInput
+            id="montoOperativo"
+            value={monto === "" ? 0 : Number(monto)}
+            onChange={(val) => setMonto(val.toString())}
+            className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:border-[#A13E21] outline-none"
+          />
+        </div>
       </div>
 
       <button

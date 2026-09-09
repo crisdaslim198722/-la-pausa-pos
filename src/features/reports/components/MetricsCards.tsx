@@ -1,6 +1,7 @@
 "use client";
 
 import { DollarSign, TrendingUp, TrendingDown, Clock, Activity } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface MetricsProps {
   ingresosTotales: number;
