@@ -38,7 +38,7 @@ export default async function MainDashboardPage() {
             />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black mb-2">Panel de Control</h1>
-          <p className="text-xl opacity-80 font-medium">Gestión integral de tu cafetería</p>
+          <p className="text-xl opacity-80 font-medium">Gestión integral de tu espacio de café de especialidad</p>
         </div>
         
         {/* Decorative background circle */}
