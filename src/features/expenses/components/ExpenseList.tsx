@@ -1,6 +1,7 @@
 "use client";
 
 import { PackageSearch, Receipt, Calendar } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface Gasto {
   id: string;
@@ -61,7 +62,7 @@ export function ExpenseList({ gastos }: { gastos: Gasto[] }) {
                   {new Date(gasto.fechaHora).toLocaleDateString()} {new Date(gasto.fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </td>
                 <td className="p-4 text-right font-black text-gray-800">
-                  ${gasto.montoTotal.toFixed(2)}
+                  {formatCurrency(gasto.montoTotal)}
                 </td>
               </tr>
             ))}

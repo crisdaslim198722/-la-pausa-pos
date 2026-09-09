@@ -4,6 +4,7 @@ import { ExpenseForms } from "@/features/expenses/components/ExpenseForms";
 import { ExpenseList } from "@/features/expenses/components/ExpenseList";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 export default async function GastosPage() {
   const [gastosRes, insumosRes] = await Promise.all([
@@ -45,7 +46,7 @@ export default async function GastosPage() {
 
           <div className="bg-gray-800 text-white p-6 rounded-2xl shadow-sm">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Salidas (Histórico)</p>
-            <p className="text-4xl font-black text-red-400">${totalGastosMes.toFixed(2)}</p>
+            <p className="text-4xl font-black text-red-400">{formatCurrency(totalGastosMes)}</p>
           </div>
         </div>
 

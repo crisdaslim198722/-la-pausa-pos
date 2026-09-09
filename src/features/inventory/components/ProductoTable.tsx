@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Edit2, Search, Coffee } from "lucide-react";
+import { Edit2, PackageSearch, Search, Coffee } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface Producto {
   id: string;
@@ -95,7 +96,7 @@ export function ProductoTable({ productos }: Props) {
                       {producto._count.receta} insumos
                     </span>
                   </td>
-                  <td className="p-3 text-[#A13E21] font-bold">${Number(producto.costoTotal).toFixed(2)}</td>
+                  <td className="p-3 text-[#A13E21] font-bold">{formatCurrency(Number(producto.costoTotal))}</td>
                   <td className="p-3 text-center">
                     <Link
                       href={`/productos/${producto.id}/editar`}

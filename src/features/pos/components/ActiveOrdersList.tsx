@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { updateOrderState } from "../actions/update-order";
 import toast from "react-hot-toast";
-import { CheckCircle2, Coffee, DollarSign, Loader2, X } from "lucide-react";
+import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface PedidoDetail {
   id: string;
