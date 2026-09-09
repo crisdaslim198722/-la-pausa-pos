@@ -1,12 +1,13 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Calendar } from "lucide-react";
 
 export function DateRangeFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   
   const initialStart = searchParams.get("start") || new Date().toISOString().split('T')[0];
   const initialEnd = searchParams.get("end") || new Date().toISOString().split('T')[0];
@@ -23,7 +24,7 @@ export function DateRangeFilter() {
   const applyDates = (start: string, end: string) => {
     setStartDate(start);
     setEndDate(end);
-    router.push(`/reportes?start=${start}&end=${end}`);
+    router.push(`${pathname}?start=${start}&end=${end}`);
   };
 
   const handleCustomSubmit = (e: React.FormEvent) => {
