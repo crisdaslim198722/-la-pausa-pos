@@ -27,12 +27,13 @@ export default async function MainDashboardPage() {
         <div className="max-w-5xl mx-auto relative z-10 text-white">
           <div className="mb-6 opacity-95">
             <Image 
-              src="/images/logo-blanco.png" 
+              src="/images/logo-2.png" 
               alt="la·Pausa Café" 
               width={160} 
               height={80} 
               className="object-contain drop-shadow-md"
               priority
+              unoptimized
             />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black mb-2">Panel de Control</h1>
