@@ -1,6 +1,7 @@
 "use client";
 
 import { usePOSCart } from "./POSCartContext";
+import { formatCurrency } from "@/lib/format";
 
 interface ProductoBase {
   id: string;
@@ -36,7 +37,7 @@ export function POSProductGrid({ productos }: Props) {
             <div className="mb-4">
               <h3 className="font-bold text-[#6E6C41] leading-tight mb-1">{p.nombre}</h3>
               {isAvailable ? (
-                <p className="font-semibold text-[#A13E21]">${p.precioVentaActual.toFixed(2)}</p>
+                <p className="font-semibold text-[#A13E21]">{formatCurrency(p.precioVentaActual)}</p>
               ) : (
                 <p className="text-xs font-bold text-gray-500 uppercase">Sin Precio</p>
               )}

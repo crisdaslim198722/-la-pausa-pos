@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatCurrency } from "@/lib/format";
 import { getFinancialMetrics } from "@/features/reports/actions/get-closure";
 import { 
   Coffee, 
@@ -52,7 +53,7 @@ export default async function MainDashboardPage() {
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Resumen del Día (Hoy)</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-black text-green-600">${metrics.ingresosTotales.toFixed(2)}</p>
+                <p className="text-3xl font-black text-green-600">{formatCurrency(metrics.ingresosTotales)}</p>
                 <span className="text-sm font-bold text-gray-500">cobrados</span>
               </div>
             </div>
@@ -63,7 +64,7 @@ export default async function MainDashboardPage() {
                 <p className="text-xs font-bold text-gray-400 uppercase">Órdenes</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-black text-orange-500">${metrics.dineroPendiente.toFixed(0)}</p>
+                <p className="text-2xl font-black text-orange-500">{formatCurrency(metrics.dineroPendiente)}</p>
                 <p className="text-xs font-bold text-gray-400 uppercase">En Barra</p>
               </div>
             </div>

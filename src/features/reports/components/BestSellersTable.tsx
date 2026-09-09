@@ -1,6 +1,7 @@
 "use client";
 
 import { Award } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface BestSeller {
   nombre: string;
@@ -39,7 +40,7 @@ export function BestSellersTable({ productos }: { productos: BestSeller[] }) {
                   </span>
                 </td>
                 <td className="p-4 text-right font-black text-green-700">
-                  ${p.ingresoGenerado.toFixed(2)}
+                  {formatCurrency(p.ingresoGenerado)}
                 </td>
               </tr>
             ))}
