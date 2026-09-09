@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getFinancialMetrics } from "@/features/reports/actions/get-closure";
 import { 
   Coffee, 
@@ -24,9 +25,15 @@ export default async function MainDashboardPage() {
       {/* Hero / Header Section */}
       <div className="bg-[#A13E21] pt-12 pb-24 px-4 sm:px-8 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10 text-white">
-          <div className="flex items-center gap-3 mb-4 opacity-90">
-            <Store className="w-8 h-8" />
-            <span className="text-xl font-bold tracking-widest uppercase">la·Pausa Café</span>
+          <div className="mb-6 opacity-95">
+            <Image 
+              src="/images/logo-blanco.png" 
+              alt="la·Pausa Café" 
+              width={160} 
+              height={80} 
+              className="object-contain drop-shadow-md"
+              priority
+            />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black mb-2">Panel de Control</h1>
           <p className="text-xl opacity-80 font-medium">Gestión integral de tu cafetería</p>
