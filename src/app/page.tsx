@@ -9,7 +9,8 @@ import {
   TrendingUp,
   TrendingDown,
   Store,
-  ChevronRight
+  ChevronRight,
+  PieChart
 } from "lucide-react";
 
 export default async function MainDashboardPage() {
@@ -151,6 +152,15 @@ export default async function MainDashboardPage() {
               title="Reportes y Cierre"
               description="Métricas diarias, mensuales y top ventas."
               icon={<TrendingUp className="w-6 h-6 text-[#2b5a82]" />}
+              colorClass="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800"
+              iconBg="bg-[#e6eef5]"
+            />
+
+            <DashboardCard 
+              href="/reportes/mix"
+              title="Mix de Ventas"
+              description="Análisis del margen ponderado y participación."
+              icon={<PieChart className="w-6 h-6 text-[#2b5a82]" />}
               colorClass="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800"
               iconBg="bg-[#e6eef5]"
             />

@@ -1,8 +1,5 @@
-- [ ] Paso 1: Actualizar `schema.prisma` agregando el modelo `Gasto` y enum `TipoGasto`.
-- [ ] Paso 2: Crear carpetas de features y rutas para `gastos`.
-- [ ] Paso 3: Crear `schema.ts` (Zod) para gastos.
-- [ ] Paso 4: Crear Server Actions en `expense-actions.ts`.
-- [ ] Paso 5: Implementar los componentes UI de formularios.
-- [ ] Paso 6: Implementar el listado de gastos y ensamblar la página `/gastos`.
-- [ ] Paso 7: Agregar el acceso directo en el `MainDashboard` (`/`).
-- [ ] Paso 8: Ejecutar `npm run build` para validar y pedirle al usuario que regenere Prisma.
+- [ ] 1. Implementar `src/features/reports/actions/get-sales-mix.ts` para extraer y procesar la participación y aportes de margen.
+- [ ] 2. Crear `SalesMixTable.tsx` para mostrar la tabla analítica con barras de progreso de participación.
+- [ ] 3. Crear `src/app/reportes/mix/page.tsx` con filtros de fechas, KPIs y el botón de "Volver al Inicio" estándar.
+- [ ] 4. Agregar la tarjeta de "Mix de Ventas" en la landing page (`src/app/page.tsx`).
+- [ ] 5. Validar con `npm run build` y pushear a github.
