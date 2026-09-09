@@ -9,6 +9,7 @@ interface InsumoOption {
   id: string;
   nombre: string;
   unidadCompra: string;
+  unidadMedida: string;
 }
 
 export function ExpenseForms({ insumos }: { insumos: InsumoOption[] }) {
@@ -119,11 +120,11 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
 
       {selectedInsumo && (
         <div className="bg-[#e8f0eb] border border-[#3e664f]/20 rounded-lg p-3 text-sm text-[#2c4c3b]">
-          💡 Estás registrando esta compra en <strong>{selectedInsumo.unidadCompra}</strong>.{' '}
-          {selectedInsumo.unidadCompra === 'gramos' && "Por ejemplo, si compraste medio kilo (500 gramos), simplemente ingresa 500."}
-          {selectedInsumo.unidadCompra === 'mililitros' && "Por ejemplo, si compraste 2 litros (2000 mililitros), simplemente ingresa 2000."}
-          {(selectedInsumo.unidadCompra === 'unidades' || selectedInsumo.unidadCompra === 'porcion') && "Por ejemplo, si compraste 5 unidades, simplemente ingresa 5."}
-          {' '}El sistema se encargará de inyectarlo correctamente al inventario.
+          💡 Ingresa la cantidad total neta que compraste en <strong>{selectedInsumo.unidadMedida}</strong>.{' '}
+          {selectedInsumo.unidadMedida === 'gramos' && "Ejemplo: Si compraste 1 kilo, ingresa 1000."}
+          {selectedInsumo.unidadMedida === 'mililitros' && "Ejemplo: Si compraste 2 litros, ingresa 2000."}
+          {(selectedInsumo.unidadMedida === 'unidades' || selectedInsumo.unidadMedida === 'porcion') && "Ejemplo: Si compraste 5 unidades, ingresa 5."}
+          {' '}El sistema inyectará esta cantidad directamente al inventario.
         </div>
       )}
 

@@ -17,7 +17,8 @@ export default async function GastosPage() {
   const insumosMap = insumos.map(i => ({
     id: i.id,
     nombre: i.nombre,
-    unidadCompra: i.unidadCompra
+    unidadCompra: i.unidadCompra,
+    unidadMedida: i.unidadMedida
   }));
 
   const totalGastosMes = gastos.reduce((sum: number, g: any) => sum + g.montoTotal, 0);

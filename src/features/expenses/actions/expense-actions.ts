@@ -41,7 +41,8 @@ export async function createInsumoPurchaseTransaction(data: {
       if (!insumo) throw new Error("Insumo no encontrado");
 
       const rend = Number(insumo.rendimientoUnidad);
-      const injectedAmount = valid.cantidadComprada * rend;
+      // La cantidad comprada ahora se interpreta directamente en la unidadMedida (ej. gramos)
+      const injectedAmount = valid.cantidadComprada; 
 
       // 2. Crear el Gasto
       await tx.gasto.create({
@@ -50,6 +51,7 @@ export async function createInsumoPurchaseTransaction(data: {
           descripcion: `Compra de inventario: ${insumo.nombre}`,
           montoTotal: valid.montoTotal,
           insumoId: valid.insumoId,
+          // Guardamos lo que inyectó
           cantidadComprada: valid.cantidadComprada,
         }
       });
@@ -60,10 +62,10 @@ export async function createInsumoPurchaseTransaction(data: {
       let newCostoUnitario = Number(insumo.costoUnitario);
 
       if (valid.actualizarCosto) {
-        // Asumiendo que el monto pagado fue por TODA la cantidad comprada,
-        // el nuevo precio de la unidadCompra sería (montoTotal / cantidadComprada)
-        newPrecioCompra = Number((valid.montoTotal / valid.cantidadComprada).toFixed(2));
-        newCostoUnitario = Number((newPrecioCompra / rend).toFixed(2));
+        // Costo exacto por unidad de medida (ej. por 1 gramo)
+        newCostoUnitario = Number((valid.montoTotal / injectedAmount).toFixed(2));
+        // Para que coincida con su configuración original, el precio del "lote" será costo unitario * rendimiento
+        newPrecioCompra = Number((newCostoUnitario * rend).toFixed(2));
       }
 
       // 4. Actualizar el insumo
