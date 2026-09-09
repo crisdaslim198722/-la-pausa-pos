@@ -27,9 +27,9 @@ export default async function GastosPage() {
       <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
         <Link 
           href="/" 
-          className="p-2 text-gray-500 hover:text-[#A13E21] hover:bg-[#F4EEE2] rounded-full transition"
+          className="flex items-center gap-2 p-2 px-4 text-gray-500 hover:text-[#A13E21] hover:bg-[#F4EEE2] rounded-full transition font-bold text-sm"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5" /> Inicio
         </Link>
         <div>
           <h1 className="text-2xl font-black text-[#A13E21]">Gastos y Compras</h1>

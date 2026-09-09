@@ -3,7 +3,7 @@ import { POSProductGrid } from "@/features/pos/components/POSProductGrid";
 import { POSCartBar } from "@/features/pos/components/POSCartBar";
 import { POSCartProvider } from "@/features/pos/components/POSCartContext";
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock, ArrowLeft } from "lucide-react";
 
 export default async function POSPage() {
   const { data: productos = [] } = await getPreciosProductosList();
@@ -13,9 +13,17 @@ export default async function POSPage() {
       <div className="min-h-screen bg-gray-50 -m-4 sm:-m-8 p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-black text-[#A13E21]">Punto de Venta</h1>
-              <p className="text-[#6E6C41] text-sm font-semibold">Toma de pedidos rápida</p>
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/" 
+                className="flex items-center gap-2 p-2 px-4 text-gray-500 hover:text-[#A13E21] hover:bg-[#F4EEE2] rounded-full transition font-bold text-sm border border-gray-200"
+              >
+                <ArrowLeft className="w-5 h-5" /> Inicio
+              </Link>
+              <div>
+                <h1 className="text-2xl font-black text-[#A13E21]">Punto de Venta</h1>
+                <p className="text-[#6E6C41] text-sm font-semibold">Toma de pedidos rápida</p>
+              </div>
             </div>
             <Link 
               href="/pos/ordenes" 
