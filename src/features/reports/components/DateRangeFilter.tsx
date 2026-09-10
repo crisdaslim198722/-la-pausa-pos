@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Calendar } from "lucide-react";
+import { useState, useEffect, useTransition } from "react";
+import { Calendar, Loader2 } from "lucide-react";
 
 export function DateRangeFilter() {
   const router = useRouter();
@@ -14,6 +14,8 @@ export function DateRangeFilter() {
 
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
+  
+  const [isPending, startTransition] = useTransition();
 
   // Sync state if URL changes externally
   useEffect(() => {
@@ -24,7 +26,9 @@ export function DateRangeFilter() {
   const applyDates = (start: string, end: string) => {
     setStartDate(start);
     setEndDate(end);
-    router.push(`${pathname}?start=${start}&end=${end}`);
+    startTransition(() => {
+      router.push(`${pathname}?start=${start}&end=${end}`);
+    });
   };
 
   const handleCustomSubmit = (e: React.FormEvent) => {
@@ -32,7 +36,7 @@ export function DateRangeFilter() {
     applyDates(startDate, endDate);
   };
 
-  const setPreset = (daysAgoStart: number, daysAgoEnd: number = 0) => {
+  const getPresetDates = (daysAgoStart: number, daysAgoEnd: number = 0) => {
     const today = new Date();
     
     const end = new Date(today);
@@ -41,34 +45,60 @@ export function DateRangeFilter() {
     const start = new Date(today);
     start.setDate(today.getDate() - daysAgoStart);
 
-    applyDates(start.toISOString().split('T')[0], end.toISOString().split('T')[0]);
+    return {
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    };
+  };
+
+  const setPreset = (daysAgoStart: number, daysAgoEnd: number = 0) => {
+    const { start, end } = getPresetDates(daysAgoStart, daysAgoEnd);
+    applyDates(start, end);
+  };
+
+  const isPresetActive = (daysAgoStart: number, daysAgoEnd: number = 0) => {
+    const { start, end } = getPresetDates(daysAgoStart, daysAgoEnd);
+    return startDate === start && endDate === end;
+  };
+
+  const getButtonClass = (active: boolean) => {
+    return active
+      ? "px-4 py-2 bg-[#F4EEE2] text-[#A13E21] font-bold text-sm rounded-lg transition border border-[#A13E21]/20"
+      : "px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-sm rounded-lg transition border border-transparent";
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col lg:flex-row gap-6 items-start lg:items-end justify-between">
-      
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col lg:flex-row gap-6 items-start lg:items-end justify-between relative">
+      {isPending && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm text-[#A13E21] font-bold text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" /> Cargando...
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2 flex-wrap">
         <button 
           onClick={() => setPreset(0)}
-          className="px-4 py-2 bg-[#F4EEE2] text-[#A13E21] hover:bg-[#eadecc] font-bold text-sm rounded-lg transition"
+          className={getButtonClass(isPresetActive(0))}
         >
           Hoy
         </button>
         <button 
           onClick={() => setPreset(1, 1)}
-          className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-sm rounded-lg transition"
+          className={getButtonClass(isPresetActive(1, 1))}
         >
           Ayer
         </button>
         <button 
           onClick={() => setPreset(7)}
-          className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-sm rounded-lg transition"
+          className={getButtonClass(isPresetActive(7))}
         >
           Últimos 7 Días
         </button>
         <button 
           onClick={() => setPreset(30)}
-          className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold text-sm rounded-lg transition"
+          className={getButtonClass(isPresetActive(30))}
         >
           Últimos 30 Días
         </button>
