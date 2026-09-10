@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getGastos } from "@/features/expenses/actions/expense-actions";
 import { getInsumos } from "@/features/inventory/actions/insumo-actions";
 import { ExpenseForms } from "@/features/expenses/components/ExpenseForms";

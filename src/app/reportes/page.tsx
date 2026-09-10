@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getFinancialMetrics } from "@/features/reports/actions/get-closure";
 import { DateRangeFilter } from "@/features/reports/components/DateRangeFilter";
 import { MetricsCards } from "@/features/reports/components/MetricsCards";

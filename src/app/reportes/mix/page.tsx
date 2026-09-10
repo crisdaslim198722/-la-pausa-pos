@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSalesMix } from "@/features/reports/actions/get-sales-mix";
 import { DateRangeFilter } from "@/features/reports/components/DateRangeFilter";
 import { SalesMixTable } from "@/features/reports/components/SalesMixTable";
