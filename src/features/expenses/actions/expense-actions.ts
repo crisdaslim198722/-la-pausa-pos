@@ -64,8 +64,8 @@ export async function createInsumoPurchaseTransaction(data: {
       if (valid.actualizarCosto) {
         // Costo exacto por unidad de medida (ej. por 1 gramo)
         newCostoUnitario = Number((valid.montoTotal / injectedAmount).toFixed(2));
-        // Para que coincida con su configuración original, el precio del "lote" será costo unitario * rendimiento
-        newPrecioCompra = Number((newCostoUnitario * rend).toFixed(2));
+        // El precio de compra se actualiza al monto total de la última compra
+        newPrecioCompra = valid.montoTotal;
       }
 
       // 4. Actualizar el insumo
@@ -74,6 +74,7 @@ export async function createInsumoPurchaseTransaction(data: {
         data: {
           cantidadDisponible: newCantidadDisponible,
           precioCompra: newPrecioCompra,
+          rendimientoUnidad: valid.actualizarCosto ? injectedAmount : insumo.rendimientoUnidad,
           costoUnitario: newCostoUnitario
         }
       });

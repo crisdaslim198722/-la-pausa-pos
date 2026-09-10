@@ -5,8 +5,6 @@ import { CreateInsumoSchema, UpdateInsumoSchema, CreateInsumoInput, UpdateInsumo
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-// Helper para transformar objetos Decimal de Prisma a números puros
-// Esto evita el error de Next.js: "Only plain objects can be passed to Client Components from Server Components"
 function serializeInsumo(insumo: any) {
   return {
     ...insumo,
@@ -23,17 +21,15 @@ export async function createInsumo(data: CreateInsumoInput) {
   try {
     const validatedData = CreateInsumoSchema.parse(data);
 
-    // Calculate costoUnitario: precioCompra / rendimientoUnidad
-    const costoUnitario = Number((validatedData.precioCompra / validatedData.rendimientoUnidad).toFixed(2));
-
+    // Initial cost is 0 since no purchase has been made yet
     const newInsumo = await prisma.insumo.create({
       data: {
         nombre: validatedData.nombre,
         unidadCompra: validatedData.unidadCompra,
-        precioCompra: validatedData.precioCompra,
-        rendimientoUnidad: validatedData.rendimientoUnidad,
+        precioCompra: 0,
+        rendimientoUnidad: 0,
         unidadMedida: validatedData.unidadMedida,
-        costoUnitario,
+        costoUnitario: 0,
       },
     });
 
@@ -51,55 +47,17 @@ export async function updateInsumo(id: string, data: UpdateInsumoInput) {
   try {
     const validatedData = UpdateInsumoSchema.parse(data);
 
-    const costoUnitario = Number((validatedData.precioCompra / validatedData.rendimientoUnidad).toFixed(2));
-
-    const updatedInsumo = await prisma.$transaction(async (tx) => {
-      // 1. Actualizar el Insumo
-      const insumo = await tx.insumo.update({
+    // Only update name and units. Cost and prices are handled by Gastos.
+    const updatedInsumo = await prisma.insumo.update({
         where: { id },
         data: {
           unidadCompra: validatedData.unidadCompra,
-          precioCompra: validatedData.precioCompra,
-          rendimientoUnidad: validatedData.rendimientoUnidad,
           unidadMedida: validatedData.unidadMedida,
-          costoUnitario,
         },
-      });
-
-      // 2. Propagar el costo a las Recetas que lo usan
-      const affectedItems = await tx.recetaItem.findMany({
-        where: { insumoId: id }
-      });
-
-      if (affectedItems.length > 0) {
-        // 3. Actualizar subtotales
-        for (const item of affectedItems) {
-          const newSubtotal = Number((Number(item.cantidad) * costoUnitario).toFixed(2));
-          await tx.recetaItem.update({
-            where: { id: item.id },
-            data: { costoSubtotal: newSubtotal }
-          });
-        }
-
-        // 4. Recalcular el total de los productos afectados
-        const productIds = [...new Set(affectedItems.map(i => i.productoId))];
-        for (const pid of productIds) {
-          const allItems = await tx.recetaItem.findMany({
-            where: { productoId: pid }
-          });
-          const newTotal = allItems.reduce((acc, curr) => acc + Number(curr.costoSubtotal), 0);
-          await tx.producto.update({
-            where: { id: pid },
-            data: { costoTotal: Number(newTotal.toFixed(2)) }
-          });
-        }
-      }
-
-      return insumo;
     });
 
     revalidatePath("/inventario/insumos");
-    revalidatePath("/productos"); // Refrescar vista de productos también
+    revalidatePath("/productos");
     return { success: true, data: serializeInsumo(updatedInsumo) };
   } catch (error: any) {
     return { success: false, error: error.message || "Error al actualizar el insumo" };
@@ -113,15 +71,12 @@ export async function getInsumos() {
     });
     return { success: true, data: insumos.map(serializeInsumo) };
   } catch (error: any) {
-    return { success: false, error: "No se pudo cargar el listado de insumos. Intente nuevamente más tarde" };
+    return { success: false, error: "No se pudo cargar el listado de insumos. Intente nuevamente mǭs tarde" };
   }
 }
 
 export async function deleteInsumo(id: string) {
   try {
-    // Aquí el spec menciona: verificar dependencias en RecetaItem antes de eliminar.
-    // Como RecetaItem aún no existe, dejamos el borrado simple. 
-    // Cuando exista la relación, Prisma lanzará un P2003 (Foreign key constraint failed).
     await prisma.insumo.delete({
       where: { id },
     });
@@ -130,7 +85,7 @@ export async function deleteInsumo(id: string) {
     return { success: true };
   } catch (error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
-      return { success: false, error: "No se puede eliminar un insumo asociado a una receta" };
+      return { success: false, error: "No se puede eliminar un insumo asociado a una receta o gasto" };
     }
     return { success: false, error: "Error al eliminar el insumo" };
   }
