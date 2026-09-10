@@ -120,9 +120,18 @@ export async function createInsumoPurchaseTransaction(data: {
   }
 }
 
-export async function getGastos() {
+export async function getGastos(startDate?: string, endDate?: string) {
   try {
+    const whereClause: any = {};
+    if (startDate && endDate) {
+      whereClause.fechaHora = {
+        gte: new Date(`${startDate}T00:00:00.000Z`),
+        lte: new Date(`${endDate}T23:59:59.999Z`),
+      };
+    }
+
     const gastos = await prisma.gasto.findMany({
+      where: whereClause,
       orderBy: { fechaHora: "desc" },
       include: {
         insumo: { select: { nombre: true, unidadCompra: true } }
