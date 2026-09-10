@@ -13,6 +13,7 @@ interface Insumo {
   rendimientoUnidad: number | any;
   unidadMedida: string;
   costoUnitario: number | any;
+  cantidadDisponible?: number | any;
 }
 
 interface Props {
@@ -95,6 +96,7 @@ export function InsumoTable({ insumos }: Props) {
                 <th className="p-3 font-semibold text-sm hidden md:table-cell">Rendimiento</th>
                 <th className="p-3 font-semibold text-sm hidden sm:table-cell">Medida</th>
                 <th className="p-3 font-semibold text-sm">Costo Unitario</th>
+                <th className="p-3 font-semibold text-sm text-right">Stock Actual</th>
                 <th className="p-3 font-semibold text-sm text-center">Acciones</th>
               </tr>
             </thead>
@@ -107,6 +109,11 @@ export function InsumoTable({ insumos }: Props) {
                   <td className="p-3 text-gray-600 hidden md:table-cell">{Number(insumo.rendimientoUnidad)}</td>
                   <td className="p-3 text-gray-600 hidden sm:table-cell capitalize">{insumo.unidadMedida}</td>
                   <td className="p-3 text-[#A13E21] font-semibold">{formatCurrency(Number(insumo.costoUnitario))}</td>
+                  <td className="p-3 text-right font-black text-gray-800">
+                    <span className={`px-2 py-1 rounded-md text-xs ${Number(insumo.cantidadDisponible) <= 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                      {Number(insumo.cantidadDisponible || 0)} <span className="uppercase">{insumo.unidadMedida}</span>
+                    </span>
+                  </td>
                   <td className="p-3 text-center">
                     <Link
                       href={`/inventario/insumos/${insumo.id}/editar`}
