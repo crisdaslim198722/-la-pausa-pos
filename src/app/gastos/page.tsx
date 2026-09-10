@@ -10,9 +10,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
-export default async function GastosPage({ searchParams }: { searchParams: { start?: string, end?: string } }) {
-  const startDate = searchParams.start || new Date().toISOString().split('T')[0];
-  const endDate = searchParams.end || new Date().toISOString().split('T')[0];
+export default async function GastosPage({ searchParams }: { searchParams: Promise<{ start?: string, end?: string }> }) {
+  const resolvedParams = await searchParams;
+  const startDate = resolvedParams.start || new Date().toISOString().split('T')[0];
+  const endDate = resolvedParams.end || new Date().toISOString().split('T')[0];
 
   const [gastosRes, insumosRes] = await Promise.all([
     getGastos(startDate, endDate),
