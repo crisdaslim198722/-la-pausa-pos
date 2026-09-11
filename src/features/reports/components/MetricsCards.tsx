@@ -20,7 +20,7 @@ export function MetricsCards({ metrics }: { metrics: MetricsProps }) {
           <p className="text-sm font-bold uppercase tracking-widest opacity-80 mb-1 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" /> Ganancia Neta
           </p>
-          <p className="text-5xl font-black">${metrics.gananciaNeta.toFixed(2)}</p>
+          <p className="text-5xl font-black">{formatCurrency(Number(metrics.gananciaNeta))}</p>
           
           <div className="mt-4 inline-flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full text-sm font-bold">
             <Activity className="w-4 h-4" /> Margen Rentabilidad: {metrics.margenPorcentaje.toFixed(1)}%
@@ -34,7 +34,7 @@ export function MetricsCards({ metrics }: { metrics: MetricsProps }) {
         <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1 flex items-center gap-2">
           Ingresos Brutos
         </p>
-        <p className="text-3xl font-black text-gray-800">${metrics.ingresosTotales.toFixed(2)}</p>
+        <p className="text-3xl font-black text-gray-800">{formatCurrency(Number(metrics.ingresosTotales))}</p>
         <p className="text-xs text-gray-400 mt-2">Caja cobrada</p>
       </div>
 
@@ -43,7 +43,7 @@ export function MetricsCards({ metrics }: { metrics: MetricsProps }) {
         <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1 flex items-center gap-2">
           <TrendingDown className="w-4 h-4 text-red-500" /> Costos Producción
         </p>
-        <p className="text-3xl font-black text-gray-800">${metrics.costoProduccion.toFixed(2)}</p>
+        <p className="text-3xl font-black text-gray-800">{formatCurrency(Number(metrics.costoProduccion))}</p>
         <p className="text-xs text-gray-400 mt-2">Inversión en insumos</p>
       </div>
 
@@ -57,7 +57,7 @@ export function MetricsCards({ metrics }: { metrics: MetricsProps }) {
               <p className="text-sm opacity-90">Hay dinero pendiente en la barra de órdenes activas o despachadas.</p>
             </div>
           </div>
-          <p className="text-2xl font-black text-orange-700">${metrics.dineroPendiente.toFixed(2)}</p>
+          <p className="text-2xl font-black text-orange-700">{formatCurrency(Number(metrics.dineroPendiente))}</p>
         </div>
       )}
     </div>
