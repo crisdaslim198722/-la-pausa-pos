@@ -27,9 +27,10 @@ export async function createInsumo(data: CreateInsumoInput) {
         nombre: validatedData.nombre,
         unidadCompra: validatedData.unidadCompra,
         precioCompra: 0,
-        rendimientoUnidad: 0,
+        rendimientoUnidad: validatedData.rendimientoUnidad,
         unidadMedida: validatedData.unidadMedida,
         costoUnitario: 0,
+        cantidadDisponible: 0,
       },
     });
 
@@ -53,6 +54,7 @@ export async function updateInsumo(id: string, data: UpdateInsumoInput) {
         data: {
           unidadCompra: validatedData.unidadCompra,
           unidadMedida: validatedData.unidadMedida,
+          rendimientoUnidad: validatedData.rendimientoUnidad,
         },
     });
 
