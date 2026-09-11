@@ -69,7 +69,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
           </p>
         </div>
         <div className="text-right">
-          <p className="font-black text-[#A13E21] text-xl">${pedido.totalVenta.toFixed(2)}</p>
+          <p className="font-black text-[#A13E21] text-xl">{formatCurrency(Number(pedido.totalVenta))}</p>
         </div>
       </div>
       
@@ -122,7 +122,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
         <div className="bg-white text-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center">
           <div>
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ingresos Caja Hoy</h2>
-            <p className="text-4xl font-black text-green-600">${totalPagadoDia.toFixed(2)}</p>
+            <p className="text-4xl font-black text-green-600">{formatCurrency(Number(totalPagadoDia))}</p>
           </div>
           <div className="text-right">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Órdenes Pagadas</p>
@@ -183,7 +183,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
 
             <div className="text-center mb-6">
               <p className="text-sm text-gray-500 font-bold uppercase mb-1">Total a Cobrar</p>
-              <p className="text-5xl font-black text-[#A13E21]">${pedidoCobro.totalVenta.toFixed(2)}</p>
+              <p className="text-5xl font-black text-[#A13E21]">{formatCurrency(Number(pedidoCobro.totalVenta))}</p>
               <p className="text-sm font-bold text-gray-800 mt-2">
                 Cliente: {pedidoCobro.nombreCliente || "Anónimo"}
               </p>
@@ -194,7 +194,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
                 {pedidoCobro.detalles.map(d => (
                   <li key={d.id} className="flex justify-between text-sm">
                     <span className="font-medium text-gray-600">{d.cantidadVendida}x {d.producto.nombre}</span>
-                    <span className="font-bold text-gray-800">${(d.precioVentaHistorico * d.cantidadVendida).toFixed(2)}</span>
+                    <span className="font-bold text-gray-800">{formatCurrency(Number(d.precioVentaHistorico) * Number(d.cantidadVendida))}</span>
                   </li>
                 ))}
               </ul>
