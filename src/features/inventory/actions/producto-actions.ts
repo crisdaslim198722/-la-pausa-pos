@@ -80,6 +80,7 @@ export async function createProducto(data: CreateProductoInput) {
     });
 
     revalidatePath("/productos");
+    revalidatePath("/inventario/precios");
     return { success: true, data: serializeProducto(newProducto) };
   } catch (error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

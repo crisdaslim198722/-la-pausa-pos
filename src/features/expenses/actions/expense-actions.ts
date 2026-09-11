@@ -41,8 +41,8 @@ export async function createInsumoPurchaseTransaction(data: {
       if (!insumo) throw new Error("Insumo no encontrado");
 
       const rend = Number(insumo.rendimientoUnidad);
-      // La cantidad comprada ahora se interpreta directamente en la unidadMedida (ej. gramos)
-      const injectedAmount = valid.cantidadComprada; 
+      // La cantidad comprada ahora representa EMPAQUES. Lo multiplicamos por su rendimiento para inyectar al stock.
+      const injectedAmount = valid.cantidadComprada * rend;
 
       // 2. Crear el Gasto
       await tx.gasto.create({
@@ -51,7 +51,7 @@ export async function createInsumoPurchaseTransaction(data: {
           descripcion: `Compra de inventario: ${insumo.nombre}`,
           montoTotal: valid.montoTotal,
           insumoId: valid.insumoId,
-          // Guardamos lo que inyectó
+          // Guardamos cuántos empaques compró
           cantidadComprada: valid.cantidadComprada,
         }
       });
@@ -64,8 +64,8 @@ export async function createInsumoPurchaseTransaction(data: {
       if (valid.actualizarCosto) {
         // Costo exacto por unidad de medida (ej. por 1 gramo)
         newCostoUnitario = Number((valid.montoTotal / injectedAmount).toFixed(2));
-        // El precio de compra se actualiza al monto total de la última compra
-        newPrecioCompra = valid.montoTotal;
+        // El precio de compra se actualiza al monto equivalente de 1 empaque
+        newPrecioCompra = Number((valid.montoTotal / valid.cantidadComprada).toFixed(2));
       }
 
       // 4. Actualizar el insumo
@@ -74,7 +74,6 @@ export async function createInsumoPurchaseTransaction(data: {
         data: {
           cantidadDisponible: newCantidadDisponible,
           precioCompra: newPrecioCompra,
-          rendimientoUnidad: valid.actualizarCosto ? injectedAmount : insumo.rendimientoUnidad,
           costoUnitario: newCostoUnitario
         }
       });

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getPreciosProductosList } from "@/features/inventory/actions/pricing-actions";
 import { PricingListTable } from "@/features/inventory/components/PricingListTable";
 import { ArrowLeft } from "lucide-react";

@@ -17,6 +17,7 @@ export function InsumoForm({ initialData }: InsumoFormProps) {
   const [nombre, setNombre] = useState(initialData?.nombre || "");
   const [unidadCompra, setUnidadCompra] = useState(initialData?.unidadCompra || "unidades");
   const [unidadMedida, setUnidadMedida] = useState(initialData?.unidadMedida || "gramos");
+  const [rendimientoUnidad, setRendimientoUnidad] = useState(initialData?.rendimientoUnidad || "");
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -30,6 +31,7 @@ export function InsumoForm({ initialData }: InsumoFormProps) {
       nombre,
       unidadCompra: unidadCompra as any,
       unidadMedida: unidadMedida as any,
+      rendimientoUnidad: Number(rendimientoUnidad),
     };
 
     let res;
@@ -72,35 +74,53 @@ export function InsumoForm({ initialData }: InsumoFormProps) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Unidad de compra (Presentación)</label>
-          <select
-            value={unidadCompra}
-            onChange={(e) => setUnidadCompra(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none bg-white"
-          >
-            {UNIDADES_CATALOGO.map((u) => (
-              <option key={u} value={u}>{u}</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Unidad de compra (Empaque)</label>
+            <select
+              value={unidadCompra}
+              onChange={(e) => setUnidadCompra(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none bg-white"
+            >
+              {UNIDADES_CATALOGO.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Unidad de receta</label>
+            <select
+              value={unidadMedida}
+              onChange={(e) => setUnidadMedida(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none bg-white"
+            >
+              {UNIDADES_CATALOGO.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Unidad de medida (Para Recetas)</label>
-          <select
-            value={unidadMedida}
-            onChange={(e) => setUnidadMedida(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none bg-white"
-          >
-            {UNIDADES_CATALOGO.map((u) => (
-              <option key={u} value={u}>{u}</option>
-            ))}
-          </select>
+          <label className="block text-sm font-semibold text-[#6E6C41] mb-2">Rendimiento por {unidadCompra}</label>
+          <input
+            type="number"
+            required
+            step="0.01"
+            min="0.01"
+            value={rendimientoUnidad}
+            onChange={(e) => setRendimientoUnidad(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded focus:border-[#A13E21] focus:outline-none"
+            placeholder={`¿Cuántos ${unidadMedida} trae 1 ${unidadCompra}?`}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Ej: Si compras "Bolsas" y tu receta usa "Gramos", ¿Cuántos gramos tiene 1 bolsa?
+          </p>
         </div>
 
         {!isEditing && (
           <div className="mt-2 p-4 bg-gray-50 rounded border border-gray-200 text-sm text-gray-600">
-            <strong>Nota:</strong> El precio y el rendimiento se registrarán automáticamente cuando agregues tu primera compra de este insumo en la sección de <strong>Gastos</strong>.
+            <strong>Nota:</strong> El precio de compra se registrará automáticamente cuando agregues tu primera compra de este insumo en la sección de <strong>Gastos</strong>.
           </div>
         )}
       </div>

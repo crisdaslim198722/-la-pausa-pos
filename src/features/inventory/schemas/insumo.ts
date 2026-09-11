@@ -12,7 +12,7 @@ export const CreateInsumoSchema = z.object({
     errorMap: () => ({ message: "Seleccione una unidad de compra válida" }),
   }),
   precioCompra: z.number().default(0),
-  rendimientoUnidad: z.number().default(0),
+  rendimientoUnidad: z.number().min(0.01, "El rendimiento debe ser mayor a 0"),
   unidadMedida: z.enum(UNIDADES_CATALOGO, {
     errorMap: () => ({ message: "Seleccione una unidad de medida válida" }),
   }),

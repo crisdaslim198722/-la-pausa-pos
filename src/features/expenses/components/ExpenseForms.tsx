@@ -93,7 +93,7 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-1">Cantidad Comprada</label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">Cantidad Comprada ({selectedInsumo?.unidadCompra || "Empaques"})</label>
           <input
             type="number"
             step="0.01"
@@ -121,11 +121,8 @@ function InsumoForm({ insumos }: { insumos: InsumoOption[] }) {
 
       {selectedInsumo && (
         <div className="bg-[#e8f0eb] border border-[#3e664f]/20 rounded-lg p-3 text-sm text-[#2c4c3b]">
-          💡 Ingresa la cantidad total neta que compraste en <strong>{selectedInsumo.unidadMedida}</strong>.{' '}
-          {selectedInsumo.unidadMedida === 'gramos' && "Ejemplo: Si compraste 1 kilo, ingresa 1000."}
-          {selectedInsumo.unidadMedida === 'mililitros' && "Ejemplo: Si compraste 2 litros, ingresa 2000."}
-          {(selectedInsumo.unidadMedida === 'unidades' || selectedInsumo.unidadMedida === 'porcion') && "Ejemplo: Si compraste 5 unidades, ingresa 5."}
-          {' '}El sistema inyectará esta cantidad directamente al inventario.
+          💡 Estás comprando por <strong>{selectedInsumo.unidadCompra}</strong>.{' '}
+          Ejemplo: Si ingresas 2, el sistema sabrá automáticamente que son 2 {selectedInsumo.unidadCompra} e inyectará los {selectedInsumo.unidadMedida} correspondientes basándose en el rendimiento que le configuraste.
         </div>
       )}
 
