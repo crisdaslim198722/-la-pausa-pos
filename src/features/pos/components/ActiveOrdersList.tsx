@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { updateOrderState } from "../actions/update-order";
 import toast from "react-hot-toast";
-import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee } from "lucide-react";
+import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee, MapPin, Receipt } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 interface PedidoDetail {

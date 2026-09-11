@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Trash2, Plus } from "lucide-react";
+import { Search, Plus, Trash2 } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 import { createProducto, updateProducto } from "../actions/producto-actions";
 
 interface Insumo {
@@ -171,7 +172,7 @@ export function RecipeBuilder({ initialData, insumosDisponibles }: RecipeBuilder
                         disabled={selectedInsumoIds.includes(i.id) && item.insumoId !== i.id}
                         className="capitalize"
                       >
-                        {i.nombre} - ${Number(i.costoUnitario).toFixed(2)}/{i.unidadMedida}
+                        {i.nombre} - {formatCurrency(Number(i.costoUnitario))}/{i.unidadMedida}
                       </option>
                     ))}
                   </select>
@@ -198,7 +199,7 @@ export function RecipeBuilder({ initialData, insumosDisponibles }: RecipeBuilder
                 <div className="w-full md:w-32">
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Subtotal</label>
                   <div className="p-2 bg-white border border-gray-200 rounded text-sm text-[#A13E21] font-medium text-right">
-                    ${subtotal}
+                    {formatCurrency(Number(subtotal))}
                   </div>
                 </div>
 
@@ -222,7 +223,7 @@ export function RecipeBuilder({ initialData, insumosDisponibles }: RecipeBuilder
 
         <div className="flex justify-between items-center p-4 bg-[#F4EEE2] rounded border border-[#B49659]/30 mb-8">
           <span className="text-[#6E6C41] font-bold text-lg">Costo Total de Preparación:</span>
-          <span className="text-2xl font-bold text-[#A13E21]">${costoTotal}</span>
+          <span className="text-2xl font-bold text-[#A13E21]">{formatCurrency(Number(costoTotal))}</span>
         </div>
 
         <div className="flex justify-end gap-3">

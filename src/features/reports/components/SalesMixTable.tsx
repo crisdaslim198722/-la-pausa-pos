@@ -1,5 +1,7 @@
 "use client";
 
+import { FileText, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 import { SalesMixItem } from "../actions/get-sales-mix";
 
 export function SalesMixTable({ items }: { items: SalesMixItem[] }) {
@@ -35,7 +37,7 @@ export function SalesMixTable({ items }: { items: SalesMixItem[] }) {
                   {item.unidadesVendidas}
                 </td>
                 <td className="p-4 text-right font-medium text-gray-700">
-                  ${item.ventasTotales.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(item.ventasTotales))}
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-3">

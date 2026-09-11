@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePOSCart } from "./POSCartContext";
 import { createOrderTransaction } from "../actions/create-order";
 import toast from "react-hot-toast";
-import { ShoppingBag, X, Check, Search, Coffee, Loader2 } from "lucide-react";
+import { ShoppingBag, X, Check, Search, Coffee, Loader2, ShoppingCart, Trash2, CheckCircle, Plus, Minus } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 export function POSCartBar() {

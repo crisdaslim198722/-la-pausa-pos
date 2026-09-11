@@ -1,10 +1,11 @@
 export const dynamic = "force-dynamic";
 
 import { getSalesMix } from "@/features/reports/actions/get-sales-mix";
-import { DateRangeFilter } from "@/features/reports/components/DateRangeFilter";
 import { SalesMixTable } from "@/features/reports/components/SalesMixTable";
-import { ArrowLeft, Percent, PieChart, Star } from "lucide-react";
+import { DateRangeFilter } from "@/features/reports/components/DateRangeFilter";
+import { Coffee, ArrowLeft, Percent, Star, PieChart } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 
 export default async function SalesMixPage({
   searchParams
@@ -44,7 +45,7 @@ export default async function SalesMixPage({
               <div>
                 <p className="text-sm font-bold text-gray-500 uppercase">Ventas Totales</p>
                 <p className="text-2xl font-black text-gray-800">
-                  ${data.ventasTotalesPeriodo.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(data.ventasTotalesPeriodo))}
                 </p>
               </div>
             </div>
