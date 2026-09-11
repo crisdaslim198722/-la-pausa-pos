@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getInsumos } from "@/features/inventory/actions/insumo-actions";
 import { InsumoTable } from "@/features/inventory/components/InsumoTable";
 import { ArrowLeft } from "lucide-react";
@@ -31,3 +32,4 @@ export default async function InsumosPage() {
     </div>
   );
 }
+

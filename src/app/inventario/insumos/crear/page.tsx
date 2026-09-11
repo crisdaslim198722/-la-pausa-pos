@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { InsumoForm } from "@/features/inventory/components/InsumoForm";
 
 export default function CrearInsumoPage() {
@@ -12,3 +13,4 @@ export default function CrearInsumoPage() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getProductos } from "@/features/inventory/actions/producto-actions";
 import { ProductoTable } from "@/features/inventory/components/ProductoTable";
 import { ArrowLeft } from "lucide-react";
@@ -31,3 +32,4 @@ export default async function ProductosPage() {
     </div>
   );
 }
+

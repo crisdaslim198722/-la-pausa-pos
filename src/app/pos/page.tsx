@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getPreciosProductosList } from "@/features/inventory/actions/pricing-actions";
 import { POSProductGrid } from "@/features/pos/components/POSProductGrid";
 import { POSCartBar } from "@/features/pos/components/POSCartBar";
@@ -40,3 +41,4 @@ export default async function POSPage() {
     </POSCartProvider>
   );
 }
+

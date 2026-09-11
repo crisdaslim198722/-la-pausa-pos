@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getActiveOrders } from "@/features/pos/actions/get-orders";
 import { ActiveOrdersList } from "@/features/pos/components/ActiveOrdersList";
 import Link from "next/link";
@@ -29,3 +30,4 @@ export default async function POSOrdenesPage() {
     </div>
   );
 }
+

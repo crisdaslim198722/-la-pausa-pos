@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { RecipeBuilder } from "@/features/inventory/components/RecipeBuilder";
 import { getInsumos } from "@/features/inventory/actions/insumo-actions";
 
@@ -15,3 +16,4 @@ export default async function CrearProductoPage() {
     </div>
   );
 }
+
