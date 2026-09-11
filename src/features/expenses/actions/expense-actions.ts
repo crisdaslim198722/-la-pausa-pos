@@ -40,9 +40,13 @@ export async function createInsumoPurchaseTransaction(data: {
       });
       if (!insumo) throw new Error("Insumo no encontrado");
 
-      const rend = Number(insumo.rendimientoUnidad);
+      const rend = Number(insumo.rendimientoUnidad) || 1; // Fallback a 1 si por algún error viejo era 0
       // La cantidad comprada ahora representa EMPAQUES. Lo multiplicamos por su rendimiento para inyectar al stock.
       const injectedAmount = valid.cantidadComprada * rend;
+
+      if (injectedAmount <= 0) {
+        throw new Error("El rendimiento o cantidad comprada es inválido (menor o igual a cero). Por favor revisa el catálogo.");
+      }
 
       // 2. Crear el Gasto
       await tx.gasto.create({
@@ -58,14 +62,16 @@ export async function createInsumoPurchaseTransaction(data: {
 
       // 3. Preparar nueva info del Insumo
       const newCantidadDisponible = Number(insumo.cantidadDisponible) + injectedAmount;
-      let newPrecioCompra = Number(insumo.precioCompra);
-      let newCostoUnitario = Number(insumo.costoUnitario);
+      let newPrecioCompra = Number(insumo.precioCompra) || 0;
+      let newCostoUnitario = Number(insumo.costoUnitario) || 0;
 
       if (valid.actualizarCosto) {
         // Costo exacto por unidad de medida (ej. por 1 gramo)
-        newCostoUnitario = Number((valid.montoTotal / injectedAmount).toFixed(2));
-        // El precio de compra se actualiza al monto equivalente de 1 empaque
-        newPrecioCompra = Number((valid.montoTotal / valid.cantidadComprada).toFixed(2));
+        const calcCosto = valid.montoTotal / injectedAmount;
+        newCostoUnitario = isNaN(calcCosto) || !isFinite(calcCosto) ? 0 : Number(calcCosto.toFixed(2));
+        
+        const calcPrecio = valid.montoTotal / valid.cantidadComprada;
+        newPrecioCompra = isNaN(calcPrecio) || !isFinite(calcPrecio) ? 0 : Number(calcPrecio.toFixed(2));
       }
 
       // 4. Actualizar el insumo
