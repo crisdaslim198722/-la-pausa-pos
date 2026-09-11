@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const UNIDADES_CATALOGO = ['gramos', 'mililitros', 'porcion', 'unidades'] as const;
+export const UNIDADES_CATALOGO = ['gramos', 'mililitros', 'porcion', 'unidades', 'cajas', 'bolsas', 'botellas', 'paquetes', 'kilos', 'litros'] as const;
 
 export const CreateInsumoSchema = z.object({
   nombre: z

@@ -16,6 +16,12 @@ enum UnidadMedidaEnum {
   mililitros
   porcion
   unidades
+  cajas
+  bolsas
+  botellas
+  paquetes
+  kilos
+  litros
 }
 
 model Insumo {
