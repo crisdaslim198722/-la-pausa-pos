@@ -4,6 +4,7 @@ import { useState } from "react";
 import { updateOrderState } from "../actions/update-order";
 import { cancelOrder } from "../actions/cancel-order";
 import { usePOSCart } from "./POSCartContext";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee, MapPin, Receipt, Trash2, PlusCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
@@ -39,6 +40,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
   const [cancelModalId, setCancelModalId] = useState<string | null>(null);
   
   const { setEditingOrderId, setEditingOrderName } = usePOSCart();
+  const router = useRouter();
 
   const totalPagadoDia = pedidos.filter(p => p.estado === "PAGADO").reduce((sum, p) => sum + p.totalVenta, 0);
 
@@ -94,7 +96,7 @@ export function ActiveOrdersList({ pedidos }: Props) {
               onClick={() => {
                 setEditingOrderId(pedido.id);
                 setEditingOrderName(pedido.nombreCliente || "Anónimo");
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                router.push('/pos');
               }}
               className="mt-2 text-xs font-bold text-[#B49659] hover:text-[#8a7243] flex items-center gap-1"
             >
