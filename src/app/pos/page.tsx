@@ -37,7 +37,7 @@ export default async function POSPage() {
         </div>
       </div>
       <POSCartBar />
-    </POSCartProvider>
+    </>
   );
 }
 
