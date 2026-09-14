@@ -109,14 +109,27 @@ export function ActiveOrdersList({ pedidos }: Props) {
       <div className="p-4 flex-1">
         <ul className="space-y-3">
           {pedido.detalles.map(d => (
-            <li key={d.id} className={`flex items-center gap-3 text-sm ${d.despachado ? 'opacity-50 grayscale' : ''}`}>
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#F4EEE2] text-[#A13E21] font-black flex items-center justify-center border border-[#A13E21]/20">
+            <li 
+              key={d.id} 
+              className={`flex items-center gap-3 text-sm p-2 -mx-2 rounded-lg transition-colors ${d.despachado ? 'opacity-60 bg-gray-50/50' : 'bg-orange-50/30 border border-orange-100/50'}`}
+            >
+              <span className={`flex-shrink-0 w-8 h-8 rounded-full font-black flex items-center justify-center border ${d.despachado ? 'bg-gray-200 text-gray-500 border-gray-300' : 'bg-[#F4EEE2] text-[#A13E21] border-[#A13E21]/20 shadow-sm'}`}>
                 {d.cantidadVendida}x
               </span>
-              <span className="font-semibold text-gray-700 capitalize leading-tight flex-1">
+              <span className={`font-bold capitalize leading-tight flex-1 ${d.despachado ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
                 {d.producto.nombre}
               </span>
-              {d.despachado && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+              {d.despachado ? (
+                <div className="flex items-center gap-1 text-green-700 bg-green-100 px-2 py-1 rounded-md shadow-sm border border-green-200">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Listo</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-orange-600 bg-orange-100 px-2 py-1 rounded-md shadow-sm border border-orange-200">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">Prep</span>
+                </div>
+              )}
             </li>
           ))}
         </ul>
