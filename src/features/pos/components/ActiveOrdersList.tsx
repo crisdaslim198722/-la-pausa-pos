@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { updateOrderState } from "../actions/update-order";
+import { cancelOrder } from "../actions/cancel-order";
+import { usePOSCart } from "./POSCartContext";
 import toast from "react-hot-toast";
-import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee, MapPin, Receipt } from "lucide-react";
+import { ChefHat, Check, DollarSign, Clock, Loader2, X, CheckCircle2, Coffee, MapPin, Receipt, Trash2, PlusCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 interface PedidoDetail {
@@ -12,6 +14,7 @@ interface PedidoDetail {
   cantidadVendida: number;
   precioVentaHistorico: number;
   costoHistorico: number;
+  despachado: boolean;
   producto: { nombre: string };
 }
 
@@ -33,6 +36,9 @@ interface Props {
 export function ActiveOrdersList({ pedidos }: Props) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [pedidoCobro, setPedidoCobro] = useState<Pedido | null>(null);
+  const [cancelModalId, setCancelModalId] = useState<string | null>(null);
+  
+  const { setEditingOrderId, setEditingOrderName } = usePOSCart();
 
   const totalPagadoDia = pedidos.filter(p => p.estado === "PAGADO").reduce((sum, p) => sum + p.totalVenta, 0);
 
@@ -52,6 +58,19 @@ export function ActiveOrdersList({ pedidos }: Props) {
     }
   };
 
+  const handleCancelOrder = async (id: string) => {
+    setLoadingId(id);
+    const res = await cancelOrder(id);
+    setLoadingId(null);
+    
+    if (res.success) {
+      toast.success("Pedido cancelado y stock devuelto");
+      setCancelModalId(null);
+    } else {
+      toast.error(res.error || "Error al cancelar");
+    }
+  };
+
   const activos = pedidos.filter(p => p.estado === "ACTIVO");
   const despachados = pedidos.filter(p => p.estado === "DESPACHADO");
   const pagados = pedidos.filter(p => p.estado === "PAGADO");
@@ -68,48 +87,73 @@ export function ActiveOrdersList({ pedidos }: Props) {
             {new Date(pedido.fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-right flex flex-col items-end">
           <p className="font-black text-[#A13E21] text-xl">{formatCurrency(Number(pedido.totalVenta))}</p>
+          {(isActivo || isDespachado) && (
+            <button 
+              onClick={() => {
+                setEditingOrderId(pedido.id);
+                setEditingOrderName(pedido.nombreCliente || "Anónimo");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="mt-2 text-xs font-bold text-[#B49659] hover:text-[#8a7243] flex items-center gap-1"
+            >
+              <PlusCircle className="w-3 h-3" /> Agregar
+            </button>
+          )}
         </div>
       </div>
       
       <div className="p-4 flex-1">
         <ul className="space-y-3">
           {pedido.detalles.map(d => (
-            <li key={d.id} className="flex items-center gap-3 text-sm">
+            <li key={d.id} className={`flex items-center gap-3 text-sm ${d.despachado ? 'opacity-50 grayscale' : ''}`}>
               <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#F4EEE2] text-[#A13E21] font-black flex items-center justify-center border border-[#A13E21]/20">
                 {d.cantidadVendida}x
               </span>
-              <span className="font-semibold text-gray-700 capitalize leading-tight">
+              <span className="font-semibold text-gray-700 capitalize leading-tight flex-1">
                 {d.producto.nombre}
               </span>
+              {d.despachado && <CheckCircle2 className="w-4 h-4 text-green-600" />}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="p-4 bg-gray-50 border-t border-gray-100">
+      <div className="p-4 bg-gray-50 border-t border-gray-100 space-y-2">
         {isActivo && (
-          <button
-            onClick={() => handleUpdateState(pedido.id, "DESPACHADO")}
-            disabled={loadingId === pedido.id}
-            className="w-full py-3 bg-[#B49659] hover:bg-[#a1844b] text-white rounded-lg font-bold flex justify-center items-center gap-2 transition"
-          >
-            {loadingId === pedido.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Coffee className="w-5 h-5" /> Marcar Despachado</>}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCancelModalId(pedido.id)}
+              disabled={loadingId === pedido.id}
+              className="px-3 py-3 text-red-500 hover:bg-red-50 rounded-lg transition"
+              title="Cancelar Pedido"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleUpdateState(pedido.id, "DESPACHADO")}
+              disabled={loadingId === pedido.id}
+              className="flex-1 py-3 bg-[#B49659] hover:bg-[#a1844b] text-white rounded-lg font-bold flex justify-center items-center gap-2 transition"
+            >
+              {loadingId === pedido.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Coffee className="w-5 h-5" /> Marcar Despachado</>}
+            </button>
+          </div>
         )}
+
         {isDespachado && (
           <button
             onClick={() => setPedidoCobro(pedido)}
-            disabled={loadingId === pedido.id}
-            className="w-full py-3 bg-[#A13E21] hover:bg-[#8b341c] text-white rounded-lg font-bold flex justify-center items-center gap-2 transition"
+            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold flex justify-center items-center gap-2 transition"
           >
-            {loadingId === pedido.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <><DollarSign className="w-5 h-5" /> Cobrar Pedido</>}
+            <DollarSign className="w-5 h-5" /> Cobrar Pedido
           </button>
         )}
+
         {isPagado && (
-          <div className="w-full py-2 bg-green-50 text-green-700 rounded-lg font-bold flex justify-center items-center gap-2">
-            <CheckCircle2 className="w-5 h-5" /> Pagado
+          <div className="flex justify-between items-center text-sm font-bold text-gray-400">
+            <span className="flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Entregado</span>
+            <span>Pagado</span>
           </div>
         )}
       </div>
@@ -118,62 +162,80 @@ export function ActiveOrdersList({ pedidos }: Props) {
 
   return (
     <>
-      <div className="space-y-8">
-        <div className="bg-white text-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center">
-          <div>
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ingresos Caja Hoy</h2>
-            <p className="text-4xl font-black text-green-600">{formatCurrency(Number(totalPagadoDia))}</p>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+              <ChefHat className="w-4 h-4 text-orange-600" />
+            </div>
+            <h2 className="text-xl font-black text-gray-800">En Preparación ({activos.length})</h2>
           </div>
-          <div className="text-right">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Órdenes Pagadas</p>
-            <p className="text-3xl font-black">{pagados.length}</p>
+          <div className="space-y-4">
+            {activos.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">No hay órdenes pendientes</p>
+            ) : (
+              activos.map(p => <OrderCard key={p.id} pedido={p} isActivo />)
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          
-          {/* Columna 1: En Preparación */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-black text-gray-800">Barra / Por Cobrar ({despachados.length})</h2>
+          </div>
           <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b-2 border-yellow-400 pb-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-400" />
-              <h2 className="font-bold text-gray-700">En Preparación ({activos.length})</h2>
+            {despachados.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">No hay órdenes en barra</p>
+            ) : (
+              despachados.map(p => <OrderCard key={p.id} pedido={p} isDespachado />)
+            )}
+          </div>
+        </div>
+
+        <div>
+          <div className="bg-white text-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center">
+            <div>
+              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ingresos Caja Hoy</h2>
+              <p className="text-4xl font-black text-green-600">{formatCurrency(Number(totalPagadoDia))}</p>
             </div>
-            {activos.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No hay pedidos pendientes</p>}
-            <div className="flex flex-col gap-4">
-              {activos.map(p => <OrderCard key={p.id} pedido={p} isActivo />)}
+            <div className="text-right">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Órdenes Pagadas</p>
+              <p className="text-4xl font-black text-gray-800">{pagados.length}</p>
             </div>
           </div>
-
-          {/* Columna 2: Por Cobrar */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b-2 border-orange-500 pb-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500" />
-              <h2 className="font-bold text-gray-700">Por Cobrar ({despachados.length})</h2>
-            </div>
-            {despachados.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No hay cobros pendientes</p>}
-            <div className="flex flex-col gap-4">
-              {despachados.map(p => <OrderCard key={p.id} pedido={p} isDespachado />)}
-            </div>
-          </div>
-
-          {/* Columna 3: Pagados */}
-          <div className="space-y-4 opacity-70">
-            <div className="flex items-center gap-2 border-b-2 border-green-500 pb-2">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <h2 className="font-bold text-gray-700">Pagados Recientes ({pagados.length})</h2>
-            </div>
-            <div className="flex flex-col gap-4">
-              {pagados.slice(0, 10).map(p => <OrderCard key={p.id} pedido={p} isPagado />)}
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* Pop-up de Cobro */}
+      {cancelModalId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <h2 className="text-xl font-black text-red-600 mb-2">¿Cancelar Pedido?</h2>
+            <p className="text-sm text-gray-600 mb-6">Esta acción es irreversible y devolverá los insumos consumidos al inventario.</p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setCancelModalId(null)}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl"
+              >
+                Cerrar
+              </button>
+              <button 
+                onClick={() => handleCancelOrder(cancelModalId)}
+                disabled={loadingId === cancelModalId}
+                className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl flex justify-center items-center gap-2"
+              >
+                {loadingId === cancelModalId ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirmar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {pedidoCobro && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 relative shadow-xl">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 relative animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95">
             <button 
               onClick={() => setPedidoCobro(null)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -189,7 +251,8 @@ export function ActiveOrdersList({ pedidos }: Props) {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 max-h-48 overflow-y-auto border border-gray-100">
+            <div className="bg-gray-50 rounded-xl p-4 mb-8">
+              <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Resumen del Pedido</h4>
               <ul className="space-y-2">
                 {pedidoCobro.detalles.map(d => (
                   <li key={d.id} className="flex justify-between text-sm">
@@ -203,9 +266,9 @@ export function ActiveOrdersList({ pedidos }: Props) {
             <button
               onClick={() => handleUpdateState(pedidoCobro.id, "PAGADO")}
               disabled={loadingId === pedidoCobro.id}
-              className="w-full bg-green-600 text-white h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-green-700 active:scale-95 transition-transform"
+              className="w-full bg-green-600 text-white h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
             >
-              {loadingId === pedidoCobro.id ? <Loader2 className="w-6 h-6 animate-spin" /> : "Confirmar Pago Recibido"}
+              {loadingId === pedidoCobro.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <><CheckCircle2 className="w-6 h-6" /> Confirmar Pago</>}
             </button>
           </div>
         </div>

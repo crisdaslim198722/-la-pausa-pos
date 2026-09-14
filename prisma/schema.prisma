@@ -102,6 +102,7 @@ model DetallePedido {
   cantidadVendida      Int      @map("cantidad_vendida")
   precioVentaHistorico Decimal  @map("precio_venta_historico") @db.Decimal(12, 2)
   costoHistorico       Decimal  @map("costo_historico") @db.Decimal(12, 2)
+  despachado           Boolean  @default(false)
 
   @@map("detalle_pedidos")
 }

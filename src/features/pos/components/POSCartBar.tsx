@@ -3,28 +3,36 @@
 import { useState } from "react";
 import { usePOSCart } from "./POSCartContext";
 import { createOrderTransaction } from "../actions/create-order";
+import { addProductsToOrder } from "../actions/add-products";
 import toast from "react-hot-toast";
 import { ShoppingBag, X, Check, Search, Coffee, Loader2, ShoppingCart, Trash2, CheckCircle, Plus, Minus } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 export function POSCartBar() {
-  const { items, totalItems, totalVenta, clearCart } = usePOSCart();
+  const { items, totalItems, totalVenta, clearCart, editingOrderId, editingOrderName } = usePOSCart();
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [nombreCliente, setNombreCliente] = useState("");
 
-  if (totalItems === 0) return null;
+  if (totalItems === 0 && !editingOrderId) return null;
 
   const handleCheckout = async () => {
     setLoading(true);
-    const res = await createOrderTransaction({
-      nombreCliente: nombreCliente.trim() || undefined,
-      items: items.map(i => ({ productoId: i.productoId, cantidad: i.cantidad }))
-    });
+    let res;
+
+    if (editingOrderId) {
+      res = await addProductsToOrder(editingOrderId, items.map(i => ({ productoId: i.productoId, cantidad: i.cantidad })));
+    } else {
+      res = await createOrderTransaction({
+        nombreCliente: nombreCliente.trim() || undefined,
+        items: items.map(i => ({ productoId: i.productoId, cantidad: i.cantidad }))
+      });
+    }
+
     setLoading(false);
 
     if (res.success) {
-      toast.success("Pedido creado exitosamente");
+      toast.success(editingOrderId ? "Pedido actualizado exitosamente" : "Pedido creado exitosamente");
       clearCart();
       setShowModal(false);
       setNombreCliente("");
@@ -40,23 +48,40 @@ export function POSCartBar() {
           <div className="flex flex-col">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
               <ShoppingBag className="w-3 h-3" /> {totalItems} {totalItems === 1 ? 'ítem' : 'ítems'}
+              {editingOrderId && <span className="ml-2 text-[#A13E21]">(Agregando a: {editingOrderName || "Sin Nombre"})</span>}
             </span>
             <span className="text-2xl font-black text-[#A13E21]">
-              ${totalVenta.toFixed(2)}
+              {formatCurrency(Number(totalVenta))}
             </span>
           </div>
 
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex-1 max-w-xs bg-[#A13E21] text-white h-12 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
-          >
-            Crear Pedido
-          </button>
+          <div className="flex gap-2">
+            {editingOrderId && (
+              <button
+                onClick={() => clearCart()}
+                className="bg-gray-100 text-gray-600 px-4 rounded-xl font-bold text-sm"
+              >
+                Cancelar Edición
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (editingOrderId && totalItems > 0) {
+                  handleCheckout();
+                } else if (!editingOrderId && totalItems > 0) {
+                  setShowModal(true);
+                }
+              }}
+              disabled={totalItems === 0 || loading}
+              className="flex-1 max-w-xs bg-[#A13E21] text-white px-6 h-12 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingOrderId ? "Actualizar Pedido" : "Crear Pedido")}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Modal Confirmación Pedido */}
-      {showModal && (
+      {showModal && !editingOrderId && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 relative animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95">
             <button 
@@ -67,7 +92,7 @@ export function POSCartBar() {
             </button>
 
             <h2 className="text-xl font-black text-[#A13E21] mb-2">Confirmar Pedido</h2>
-            <p className="text-sm text-gray-500 mb-6">Total a cobrar: <strong className="text-lg">${totalVenta.toFixed(2)}</strong></p>
+            <p className="text-sm text-gray-500 mb-6">Total a cobrar: <strong className="text-lg">{formatCurrency(Number(totalVenta))}</strong></p>
 
             <div className="space-y-4 mb-8">
               <div>

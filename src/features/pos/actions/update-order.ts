@@ -7,9 +7,18 @@ type PedidoEstado = "ACTIVO" | "DESPACHADO" | "PAGADO" | "CANCELADO";
 
 export async function updateOrderState(id: string, estado: PedidoEstado) {
   try {
-    await prisma.pedido.update({
-      where: { id },
-      data: { estado }
+    await prisma.$transaction(async (tx) => {
+      await tx.pedido.update({
+        where: { id },
+        data: { estado }
+      });
+
+      if (estado === "DESPACHADO") {
+        await tx.detallePedido.updateMany({
+          where: { pedidoId: id, despachado: false },
+          data: { despachado: true }
+        });
+      }
     });
 
     revalidatePath("/pos/ordenes");

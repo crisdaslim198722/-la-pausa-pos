@@ -17,12 +17,18 @@ interface POSCartContextType {
   clearCart: () => void;
   totalItems: number;
   totalVenta: number;
+  editingOrderId: string | null;
+  setEditingOrderId: (id: string | null) => void;
+  editingOrderName: string | null;
+  setEditingOrderName: (name: string | null) => void;
 }
 
 const POSCartContext = createContext<POSCartContextType | undefined>(undefined);
 
 export function POSCartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editingOrderName, setEditingOrderName] = useState<string | null>(null);
 
   const addItem = (producto: { id: string; nombre: string; precioVentaActual: number }) => {
     setItems((current) => {
@@ -46,13 +52,17 @@ export function POSCartProvider({ children }: { children: React.ReactNode }) {
     setItems(current => current.map(i => i.productoId === productoId ? { ...i, cantidad } : i));
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    setItems([]);
+    setEditingOrderId(null);
+    setEditingOrderName(null);
+  };
 
   const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.cantidad, 0), [items]);
   const totalVenta = useMemo(() => items.reduce((sum, item) => sum + (item.cantidad * item.precioVentaActual), 0), [items]);
 
   return (
-    <POSCartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalVenta }}>
+    <POSCartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalVenta, editingOrderId, setEditingOrderId, editingOrderName, setEditingOrderName }}>
       {children}
     </POSCartContext.Provider>
   );
