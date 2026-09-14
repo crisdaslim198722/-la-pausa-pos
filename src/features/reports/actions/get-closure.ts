@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function getFinancialMetrics(startDateStr?: string, endDateStr?: string) {
   try {
-    // 1. Resolver rangos de fecha
     let startDate = new Date();
     startDate.setHours(0, 0, 0, 0);
 
@@ -24,7 +23,6 @@ export async function getFinancialMetrics(startDateStr?: string, endDateStr?: st
       }
     }
 
-    // 2. Obtener pedidos en el rango
     const pedidos = await prisma.pedido.findMany({
       where: {
         fechaHora: {
@@ -44,14 +42,21 @@ export async function getFinancialMetrics(startDateStr?: string, endDateStr?: st
       }
     });
 
-    // 3. Inicializar Métricas
+    const gastos = await prisma.gasto.findMany({
+      where: {
+        fechaHora: {
+          gte: startDate,
+          lte: endDate,
+        }
+      }
+    });
+
     let ingresosTotales = 0;
     let costoProduccion = 0;
     let gananciaNeta = 0;
-    let dineroPendiente = 0; // Dinero en estado ACTIVO o DESPACHADO
+    let dineroPendiente = 0;
     let ordenesPagadas = 0;
 
-    // 4. Mapa para Best Sellers
     const productoStats = new Map<string, { nombre: string; cantidadVendida: number; ingresoGenerado: number }>();
 
     for (const pedido of pedidos) {
@@ -65,7 +70,6 @@ export async function getFinancialMetrics(startDateStr?: string, endDateStr?: st
         gananciaNeta += ganancia;
         ordenesPagadas++;
 
-        // Contar productos vendidos solo de órdenes pagadas
         for (const detalle of pedido.detalles) {
           const pId = detalle.productoId;
           const current = productoStats.get(pId) || {
@@ -84,13 +88,24 @@ export async function getFinancialMetrics(startDateStr?: string, endDateStr?: st
       }
     }
 
-    // Calcular Margen Promedio
-    const margenPorcentaje = ingresosTotales > 0 ? (gananciaNeta / ingresosTotales) * 100 : 0;
+    let comprasInsumos = 0;
+    let gastosOperativos = 0;
 
-    // Ordenar Best Sellers
+    for (const gasto of gastos) {
+      const monto = Number(gasto.montoTotal);
+      if (gasto.tipo === "COMPRA_INSUMO") {
+        comprasInsumos += monto;
+      } else if (gasto.tipo === "OPERATIVO") {
+        gastosOperativos += monto;
+      }
+    }
+
+    const margenPorcentaje = ingresosTotales > 0 ? (gananciaNeta / ingresosTotales) * 100 : 0;
+    const flujoCajaNeto = ingresosTotales - (comprasInsumos + gastosOperativos);
+
     const bestSellers = Array.from(productoStats.values())
-      .sort((a, b) => b.cantidadVendida - a.cantidadVendida) // Ordenar por cantidad (descendente)
-      .slice(0, 5); // Top 5
+      .sort((a, b) => b.cantidadVendida - a.cantidadVendida)
+      .slice(0, 5);
 
     return {
       success: true,
@@ -101,7 +116,11 @@ export async function getFinancialMetrics(startDateStr?: string, endDateStr?: st
         dineroPendiente,
         margenPorcentaje,
         ordenesPagadas,
-        bestSellers
+        bestSellers,
+        comprasInsumos,
+        gastosOperativos,
+        flujoCajaNeto,
+        totalSalidas: comprasInsumos + gastosOperativos
       }
     };
 
