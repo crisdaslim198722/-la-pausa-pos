@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${ramus.variable} ${sourceSans.variable} h-full antialiased`}>
+    <html lang="es" className={`${ramus.variable} ${sourceSans.variable} h-full antialiased`} style={{ colorScheme: 'light' }}>
       <body className="min-h-full flex flex-col bg-[#F4EEE2] font-sans">
         <Toaster position="top-right" />
         <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
